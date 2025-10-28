@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../models/map_data.dart';
+import 'custom_gravity_screen.dart';
 import 'game_screen.dart';
 
 class MapSelectionScreen extends StatefulWidget {
@@ -56,134 +58,235 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.indigo.shade900,
-              Colors.deepPurple.shade800,
-              Colors.purple.shade900,
+              const Color(0xFFFFB6C1), // Pastel pink
+              const Color(0xFFDDA0DD), // Plum
+              const Color(0xFF9370DB), // Medium purple
             ],
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              const SizedBox(height: 30),
-              // Title Section
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.flight,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                      const SizedBox(width: 15),
-                      const Text(
-                        'FLAPPY BIRD',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 15),
+                // Cute header with bird - centered
+                Column(
+                  children: [
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        decoration: BoxDecoration(
                           color: Colors.white,
-                          letterSpacing: 2,
-                          shadows: [
-                            Shadow(
-                              offset: Offset(2, 2),
-                              blurRadius: 8,
-                              color: Colors.black45,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.pink.withOpacity(0.5),
+                              blurRadius: 20,
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
-                    ),
-                    child: const Text(
-                      'Physics Demo - Experience Different Gravities',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              
-              // Selection Title
-              const Text(
-                'SELECT YOUR ENVIRONMENT',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  letterSpacing: 2,
-                ),
-              ),
-              const SizedBox(height: 30),
-              
-              // Map Grid
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20,
-                    childAspectRatio: 0.85,
-                    children: [
-                      _buildAnimatedCard(0, 'space', MapData.maps['space']!),
-                      _buildAnimatedCard(1, 'moon', MapData.maps['moon']!),
-                      _buildAnimatedCard(2, 'mars', MapData.maps['mars']!),
-                      _buildAnimatedCard(3, 'venus', MapData.maps['venus']!),
-                      _buildAnimatedCard(4, 'earth', MapData.maps['earth']!),
-                      _buildAnimatedCard(5, 'saturn', MapData.maps['saturn']!),
-                      _buildAnimatedCard(6, 'neptune', MapData.maps['neptune']!),
-                      _buildAnimatedCard(7, 'jupiter', MapData.maps['jupiter']!),
-                    ],
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 20),
-              // Instructions
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.white70, size: 24),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Tap any environment to start playing!',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          letterSpacing: 0.5,
+                        child: ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [Color(0xFFFF69B4), Color(0xFFFFB6C1)],
+                          ).createShader(bounds),
+                          child: Text(
+                            'FLAPPY BIRD',
+                            style: GoogleFonts.fredoka(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.4),
+                            Colors.white.withOpacity(0.2),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('💫', style: TextStyle(fontSize: 18)),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Choose Your World',
+                            style: GoogleFonts.bubblegumSans(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('💫', style: TextStyle(fontSize: 18)),
+                        ],
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),              // Selection Title with cute styling
+              
+              // Map Grid
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 20,
+                  childAspectRatio: 0.85,
+                  children: [
+                    _buildAnimatedCard(0, 'space', MapData.maps['space']!),
+                    _buildAnimatedCard(1, 'moon', MapData.maps['moon']!),
+                    _buildAnimatedCard(2, 'mars', MapData.maps['mars']!),
+                    _buildAnimatedCard(3, 'venus', MapData.maps['venus']!),
+                    _buildAnimatedCard(4, 'earth', MapData.maps['earth']!),
+                    _buildAnimatedCard(5, 'saturn', MapData.maps['saturn']!),
+                    _buildAnimatedCard(6, 'neptune', MapData.maps['neptune']!),
+                    _buildAnimatedCard(7, 'jupiter', MapData.maps['jupiter']!),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
+              
+              // Cute Custom Gravity Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(35),
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFFFF69B4),
+                        const Color(0xFFFF1493),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pink.withOpacity(0.6),
+                        blurRadius: 25,
+                        spreadRadius: 3,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(35),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CustomGravityScreen(),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.3),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Text('🧪', style: TextStyle(fontSize: 24)),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'CUSTOM GRAVITY LAB',
+                              style: GoogleFonts.fredoka(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 1.5,
+                                shadows: const [
+                                  Shadow(
+                                    offset: Offset(2, 2),
+                                    blurRadius: 4,
+                                    color: Colors.black26,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 28),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 15),
+              // Cute instructions box
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 25),
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.purple.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFFFF69B4),
+                            const Color(0xFFFFB6C1),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.touch_app, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Text(
+                        'Tap any planet to start!',
+                        style: GoogleFonts.bubblegumSans(
+                          color: const Color(0xFFFF69B4),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const Text('✨', style: TextStyle(fontSize: 24)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -263,32 +366,67 @@ class _MapCardState extends State<MapCard> {
                   ),
                 ),
                 
+                // Planet visual in background
+                Positioned(
+                  top: -30,
+                  right: -30,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: _getPlanetColors(widget.mapKey),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: widget.mapData.primaryColor.withOpacity(0.4),
+                          blurRadius: 30,
+                          spreadRadius: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
                 // Decorative elements based on environment
                 _buildEnvironmentDecoration(widget.mapKey),
                 
-                // Content overlay
+                // Content overlay with better contrast
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.4),
+                        Colors.black.withOpacity(0.1),
+                        Colors.black.withOpacity(0.6),
                       ],
                     ),
                   ),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Icon badge
+                      // Icon badge with planet emoji
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.3),
+                              Colors.white.withOpacity(0.1),
+                            ],
+                          ),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white.withOpacity(0.3)),
+                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(2, 2),
+                            ),
+                          ],
                         ),
                         child: Text(
                           widget.mapData.icon,
@@ -297,38 +435,62 @@ class _MapCardState extends State<MapCard> {
                       ),
                       const Spacer(),
                       
-                      // Environment name
+                      // Environment name with better styling
                       Text(
-                        widget.mapData.name,
+                        widget.mapData.name.toUpperCase(),
                         style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
                           color: Colors.white,
+                          letterSpacing: 1.2,
                           shadows: [
                             Shadow(
-                              offset: Offset(1, 1),
-                              blurRadius: 4,
-                              color: Colors.black54,
+                              offset: Offset(2, 2),
+                              blurRadius: 6,
+                              color: Colors.black87,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       
-                      // Gravity value
+                      // Gravity value with icon
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'g = ${widget.mapData.gravity} m/s²',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: widget.mapData.primaryColor,
-                            fontWeight: FontWeight.bold,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.95),
+                              Colors.white.withOpacity(0.85),
+                            ],
                           ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: const Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.speed,
+                              size: 14,
+                              color: widget.mapData.primaryColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${widget.mapData.gravity} m/s²',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: widget.mapData.primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -340,14 +502,17 @@ class _MapCardState extends State<MapCard> {
                           fontSize: 11,
                           color: Colors.white,
                           height: 1.2,
+                          fontWeight: FontWeight.w500,
                           shadows: [
                             Shadow(
                               offset: Offset(1, 1),
-                              blurRadius: 3,
-                              color: Colors.black54,
+                              blurRadius: 4,
+                              color: Colors.black87,
                             ),
                           ],
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -363,23 +528,46 @@ class _MapCardState extends State<MapCard> {
   List<Color> _getGradientColors(String mapKey) {
     switch (mapKey) {
       case 'space':
-        return [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)];
+        return [const Color(0xFF0F2027), const Color(0xFF203A43), const Color(0xFF2C5364)];
       case 'moon':
-        return [Color(0xFF2C3E50), Color(0xFF757F9A), Color(0xFFBDC3C7)];
+        return [const Color(0xFF2C3E50), const Color(0xFF757F9A), const Color(0xFFBDC3C7)];
       case 'mars':
-        return [Color(0xFFB71C1C), Color(0xFFD32F2F), Color(0xFFFFCDD2)];
+        return [const Color(0xFFB71C1C), const Color(0xFFD32F2F), const Color(0xFFFFCDD2)];
       case 'venus':
-        return [Color(0xFFF57F17), Color(0xFFFFC107), Color(0xFFFFF8E1)];
+        return [const Color(0xFFF57F17), const Color(0xFFFFC107), const Color(0xFFFFF8E1)];
       case 'earth':
-        return [Color(0xFF4A90E2), Color(0xFF50C878), Color(0xFF87CEEB)];
+        return [const Color(0xFF4A90E2), const Color(0xFF50C878), const Color(0xFF87CEEB)];
       case 'saturn':
-        return [Color(0xFFE6C300), Color(0xFFFFEB3B), Color(0xFFFFF9C4)];
+        return [const Color(0xFFE6C300), const Color(0xFFFFEB3B), const Color(0xFFFFF9C4)];
       case 'neptune':
-        return [Color(0xFF0D47A1), Color(0xFF2196F3), Color(0xFFBBDEFB)];
+        return [const Color(0xFF0D47A1), const Color(0xFF2196F3), const Color(0xFFBBDEFB)];
       case 'jupiter':
-        return [Color(0xFFE65100), Color(0xFFFF9800), Color(0xFFFFE0B2)];
+        return [const Color(0xFFE65100), const Color(0xFFFF9800), const Color(0xFFFFE0B2)];
       default:
         return [Colors.blue, Colors.purple];
+    }
+  }
+
+  List<Color> _getPlanetColors(String mapKey) {
+    switch (mapKey) {
+      case 'space':
+        return [const Color(0xFF1a1a4e), const Color(0xFF0a0a2e)];
+      case 'moon':
+        return [const Color(0xFFE0E0E0), const Color(0xFF9E9E9E), const Color(0xFF616161)];
+      case 'mars':
+        return [const Color(0xFFE57373), const Color(0xFFD32F2F), const Color(0xFF8B0000)];
+      case 'venus':
+        return [const Color(0xFFFFEB3B), const Color(0xFFFFC107), const Color(0xFFFF8F00)];
+      case 'earth':
+        return [const Color(0xFF64B5F6), const Color(0xFF4CAF50), const Color(0xFF2E7D32)];
+      case 'saturn':
+        return [const Color(0xFFFFF59D), const Color(0xFFFFEB3B), const Color(0xFFE6C300)];
+      case 'neptune':
+        return [const Color(0xFF90CAF9), const Color(0xFF2196F3), const Color(0xFF0D47A1)];
+      case 'jupiter':
+        return [const Color(0xFFFFCC80), const Color(0xFFFF9800), const Color(0xFFE65100)];
+      default:
+        return [Colors.purple, Colors.deepPurple];
     }
   }
 

@@ -3,9 +3,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../models/achievement.dart';
 import '../models/bird.dart';
 import '../models/map_data.dart';
 import '../models/pipe.dart';
+import '../utils/achievement_manager.dart';
+import '../utils/particle_system.dart';
+import '../utils/sound_manager.dart';
 import '../widgets/game_painter.dart';
 
 enum GameState { ready, playing, paused, gameOver }
@@ -34,10 +38,28 @@ class _GameScreenState extends State<GameScreen> {
   final Random random = Random();
   bool _initialized = false;
   
+  // New feature managers
+  final ParticleSystem particleSystem = ParticleSystem();
+  final AchievementManager achievementManager = AchievementManager();
+  final SoundManager soundManager = SoundManager();
+  List<Achievement> newAchievements = [];
+  bool usedPause = false;
+  bool _audioStarted = false;
+  
   @override
   void initState() {
     super.initState();
+    // Initialize managers
+    achievementManager.loadProgress();
+    soundManager.initialize();
     // Don't call _initGame here - it needs context
+  }
+
+  Future<void> _startAudioIfNeeded() async {
+    if (!_audioStarted) {
+      await soundManager.playBackgroundMusic();
+      _audioStarted = true;
+    }
   }
 
   @override
@@ -62,6 +84,9 @@ class _GameScreenState extends State<GameScreen> {
 
   void _startGame() {
     if (gameState != GameState.ready) return;
+    
+    // Start music on first user interaction (fixes web autoplay policy)
+    _startAudioIfNeeded();
     
     setState(() {
       gameState = GameState.playing;
@@ -91,6 +116,8 @@ class _GameScreenState extends State<GameScreen> {
         if (!pipe.passed && bird.x > pipe.x + pipe.width) {
           pipe.passed = true;
           score++;
+          // Play score sound
+          soundManager.playScore();
         }
       }
 
@@ -114,7 +141,7 @@ class _GameScreenState extends State<GameScreen> {
 
   void _generatePipes() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final minGapY = 180.0; // More space at top
+    const minGapY = 180.0; // More space at top
     final maxGapY = screenHeight - 180; // More space at bottom
     final gapY = minGapY + random.nextDouble() * (maxGapY - minGapY);
 
@@ -141,6 +168,21 @@ class _GameScreenState extends State<GameScreen> {
 
   void _gameOver() {
     gameTimer?.cancel();
+    
+    // Create explosion effect at bird position
+    particleSystem.createExplosion(bird.x, bird.y, color: Colors.red);
+    
+    // Play hit sound
+    soundManager.playHit();
+    
+    // Check achievements
+    newAchievements = achievementManager.checkAchievements(widget.mapKey, score, usedPause);
+    
+    // Play achievement sound if any unlocked
+    if (newAchievements.isNotEmpty) {
+      soundManager.playAchievement();
+    }
+    
     setState(() {
       gameState = GameState.gameOver;
     });
@@ -154,6 +196,13 @@ class _GameScreenState extends State<GameScreen> {
     if (gameState == GameState.playing) {
       setState(() {
         bird.flap();
+        // Add particle trail effect
+        particleSystem.createTrail(
+          bird.x + 20,
+          bird.y + 20,
+        );
+        // Play flap sound
+        soundManager.playFlap();
       });
     }
   }
@@ -161,6 +210,7 @@ class _GameScreenState extends State<GameScreen> {
   void _pause() {
     if (gameState == GameState.playing) {
       gameTimer?.cancel();
+      soundManager.pauseBackgroundMusic();
       setState(() {
         gameState = GameState.paused;
       });
@@ -169,9 +219,11 @@ class _GameScreenState extends State<GameScreen> {
 
   void _resume() {
     if (gameState == GameState.paused) {
+      soundManager.resumeBackgroundMusic();
       setState(() {
         gameState = GameState.playing;
       });
+      // Restart the game timer to continue updates
       gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
         if (gameState == GameState.playing) {
           _update();
@@ -183,11 +235,24 @@ class _GameScreenState extends State<GameScreen> {
   void _restart() {
     gameTimer?.cancel();
     _initGame();
+    // Automatically start the game without requiring tap
+    setState(() {
+      gameState = GameState.playing;
+    });
+    // Generate initial pipes
+    _generatePipes();
+    // Start game loop immediately
+    gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      if (gameState == GameState.playing) {
+        _update();
+      }
+    });
   }
 
   @override
   void dispose() {
     gameTimer?.cancel();
+    soundManager.stopBackgroundMusic();
     super.dispose();
   }
 
@@ -462,14 +527,14 @@ class _GameScreenState extends State<GameScreen> {
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(color: Colors.white.withOpacity(0.3)),
                         ),
-                        child: Column(
+                        child: const Column(
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.info_outline, color: Colors.white70, size: 20),
-                                const SizedBox(width: 8),
-                                const Text(
+                                SizedBox(width: 8),
+                                Text(
                                   'How to Play',
                                   style: TextStyle(
                                     fontSize: 16,
@@ -479,8 +544,8 @@ class _GameScreenState extends State<GameScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
+                            SizedBox(height: 8),
+                            Text(
                               'Tap to flap and avoid pipes\nExperience different gravity forces!',
                               textAlign: TextAlign.center,
                               style: TextStyle(
