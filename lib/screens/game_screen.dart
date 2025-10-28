@@ -45,6 +45,7 @@ class _GameScreenState extends State<GameScreen> {
   List<Achievement> newAchievements = [];
   bool usedPause = false;
   bool _audioStarted = false;
+  double backgroundOffset = 0; // For scrolling background
   
   @override
   void initState() {
@@ -57,7 +58,7 @@ class _GameScreenState extends State<GameScreen> {
 
   Future<void> _startAudioIfNeeded() async {
     if (!_audioStarted) {
-      await soundManager.playBackgroundMusic();
+      await soundManager.playGameMusic(); // Switch to ukulele music for gameplay
       _audioStarted = true;
     }
   }
@@ -85,7 +86,7 @@ class _GameScreenState extends State<GameScreen> {
   void _startGame() {
     if (gameState != GameState.ready) return;
     
-    // Start music on first user interaction (fixes web autoplay policy)
+    // Start game music (ukulele) when gameplay begins
     _startAudioIfNeeded();
     
     setState(() {
@@ -107,6 +108,16 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {
       // Update bird physics
       bird.update(widget.mapData.gravityPixels);
+
+      // Scroll background
+      backgroundOffset += pipeSpeed * 0.5; // Scroll at half the pipe speed for parallax effect
+      
+      // Reset when scrolled one full image width for seamless loop
+      // Image aspect ratio is 1536:672, so width = height * 2.286
+      final imageWidth = MediaQuery.of(context).size.height * (1536 / 672);
+      if (backgroundOffset >= imageWidth) {
+        backgroundOffset -= imageWidth;
+      }
 
       // Update pipes
       for (var pipe in pipes) {
@@ -265,9 +276,40 @@ class _GameScreenState extends State<GameScreen> {
         onTap: _flap,
         child: Stack(
           children: [
-            // Game Canvas
+            // Scrolling Background Image - optimized for 1536x672 panoramic images
             Container(
+              width: size.width,
+              height: size.height,
               color: widget.mapData.backgroundColor,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Calculate width needed to show full image height without cropping
+                  const imageAspectRatio = 1536 / 672; // 2.286:1
+                  final imageWidth = constraints.maxHeight * imageAspectRatio;
+                  
+                  return ClipRect(
+                    child: Stack(
+                      children: List.generate(3, (index) {
+                        // Create 3 background images for seamless horizontal scrolling
+                        return Positioned(
+                          left: (index * imageWidth) - backgroundOffset,
+                          top: 0,
+                          child: Image.asset(
+                            widget.mapData.backgroundImage,
+                            width: imageWidth,
+                            height: constraints.maxHeight,
+                            fit: BoxFit.fitHeight, // Fits height, shows full width
+                          ),
+                        );
+                      }),
+                    ),
+                  );
+                },
+              ),
+            ),
+            // Game Canvas (bird and pipes)
+            Container(
+              color: Colors.transparent,
               child: CustomPaint(
                 size: size,
                 painter: GamePainter(
@@ -417,9 +459,15 @@ class _GameScreenState extends State<GameScreen> {
                         ),
                         ElevatedButton.icon(
                           onPressed: gameState == GameState.playing
-                              ? _pause
+                              ? () {
+                                  soundManager.playButton();
+                                  _pause();
+                                }
                               : gameState == GameState.paused
-                                  ? _resume
+                                  ? () {
+                                      soundManager.playButton();
+                                      _resume();
+                                    }
                                   : null,
                           icon: Icon(
                             gameState == GameState.paused
@@ -648,12 +696,70 @@ class _GameScreenState extends State<GameScreen> {
                           ],
                         ),
                       ),
+                      // Achievement Notifications
+                      if (newAchievements.isNotEmpty) ...[
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFFFFD700), // Gold
+                                Color(0xFFFFB6C1), // Pink
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.yellow.withOpacity(0.5),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              const Text(
+                                '🎉 NEW ACHIEVEMENTS! 🎉',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ...newAchievements.map((achievement) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(achievement.icon, style: const TextStyle(fontSize: 24)),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      achievement.title,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 32),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton.icon(
-                            onPressed: _restart,
+                            onPressed: () {
+                              soundManager.playButton();
+                              _restart();
+                            },
                             icon: const Icon(Icons.refresh),
                             label: const Text('Play Again'),
                             style: ElevatedButton.styleFrom(
@@ -667,7 +773,10 @@ class _GameScreenState extends State<GameScreen> {
                           ),
                           const SizedBox(width: 16),
                           ElevatedButton.icon(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              soundManager.playButton();
+                              Navigator.pop(context);
+                            },
                             icon: const Icon(Icons.map),
                             label: const Text('Change Map'),
                             style: ElevatedButton.styleFrom(

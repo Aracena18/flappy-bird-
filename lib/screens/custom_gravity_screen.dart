@@ -180,6 +180,7 @@ class _CustomGravityScreenState extends State<CustomGravityScreen> {
                                     primaryColor: Colors.purple,
                                     backgroundColor: const Color(0xFF1a1a2e),
                                     pipeColor: Colors.purpleAccent,
+                                    backgroundImage: 'assets/audio/world_backgrounds/space.png', // Use space background for custom
                                   ),
                                 ),
                               ),

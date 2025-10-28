@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../models/map_data.dart';
+import '../utils/sound_manager.dart';
+import 'achievements_screen.dart';
 import 'custom_gravity_screen.dart';
 import 'game_screen.dart';
 
@@ -15,37 +17,52 @@ class MapSelectionScreen extends StatefulWidget {
 }
 
 class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProviderStateMixin {
-  late List<AnimationController> _controllers;
-  late List<Animation<double>> _animations;
+  late PageController _pageController;
+  int _currentPage = 0;
+  double _currentPageValue = 0.0;
+  
+  // List of world keys in order
+  final List<String> _worldKeys = [
+    'space',
+    'moon',
+    'mars',
+    'venus',
+    'earth',
+    'saturn',
+    'neptune',
+    'jupiter',
+  ];
+
+  // Map of PNG file names for each world
+  final Map<String, String> _worldMapImages = {
+    'earth': 'assets/audio/world_maps/Earth_Map.png',
+    'moon': 'assets/audio/world_maps/Moon_Map.png',
+    'mars': 'assets/audio/world_maps/Mars_Map.png',
+    'venus': 'assets/audio/world_maps/Venus_Map.png',
+    'jupiter': 'assets/audio/world_maps/Jupiter_map.png',
+    'saturn': 'assets/audio/world_maps/Saturn_Map.png',
+    'neptune': 'assets/audio/world_maps/Neptune_map.png',
+    'space': 'assets/audio/world_maps/Space_Map.png',
+  };
 
   @override
   void initState() {
     super.initState();
-    _controllers = List.generate(
-      8, // Updated from 4 to 8 maps
-      (index) => AnimationController(
-        duration: Duration(milliseconds: 600 + (index * 100)),
-        vsync: this,
-      ),
+    _pageController = PageController(
+      initialPage: _currentPage,
+      viewportFraction: 0.8, // Show parts of adjacent pages
     );
-
-    _animations = _controllers.map((controller) {
-      return CurvedAnimation(parent: controller, curve: Curves.elasticOut);
-    }).toList();
-
-    // Stagger the animations
-    for (var i = 0; i < _controllers.length; i++) {
-      Future.delayed(Duration(milliseconds: i * 150), () {
-        if (mounted) _controllers[i].forward();
+    
+    _pageController.addListener(() {
+      setState(() {
+        _currentPageValue = _pageController.page ?? 0.0;
       });
-    }
+    });
   }
 
   @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -58,112 +75,197 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFFFFB6C1), // Pastel pink
-              const Color(0xFFDDA0DD), // Plum
-              const Color(0xFF9370DB), // Medium purple
+              const Color(0xFF0F2027),
+              const Color(0xFF203A43),
+              const Color(0xFF2C5364),
             ],
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 15),
-                // Cute header with bird - centered
-                Column(
+          child: Column(
+            children: [
+              const SizedBox(height: 15),
+              // Header with Achievements Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.pink.withOpacity(0.5),
-                              blurRadius: 20,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [Color(0xFFFF69B4), Color(0xFFFFB6C1)],
-                          ).createShader(bounds),
-                          child: Text(
-                            'FLAPPY BIRD',
-                            style: GoogleFonts.fredoka(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: 1.5,
-                            ),
+                    // Logo
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.pink.withOpacity(0.5),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [Color(0xFFFF69B4), Color(0xFFFFB6C1)],
+                        ).createShader(bounds),
+                        child: Text(
+                          'FLAPPY BIRD',
+                          style: GoogleFonts.fredoka(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 1.2,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 15),
+                    // Achievements Button
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(0.4),
-                            Colors.white.withOpacity(0.2),
+                            const Color(0xFFFFD700),
+                            const Color(0xFFFFB6C1),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.yellow.withOpacity(0.4),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('💫', style: TextStyle(fontSize: 18)),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Choose Your World',
-                            style: GoogleFonts.bubblegumSans(
-                              fontSize: 18,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () {
+                            SoundManager().playButton();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AchievementsScreen(),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('🏆', style: TextStyle(fontSize: 18)),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Achievements',
+                                  style: GoogleFonts.fredoka(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          const Text('💫', style: TextStyle(fontSize: 18)),
-                        ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),              // Selection Title with cute styling
+              ),
+              const SizedBox(height: 25),
               
-              // Map Grid
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 20,
-                  childAspectRatio: 0.85,
+              // Title
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.3),
+                      Colors.white.withOpacity(0.1),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildAnimatedCard(0, 'space', MapData.maps['space']!),
-                    _buildAnimatedCard(1, 'moon', MapData.maps['moon']!),
-                    _buildAnimatedCard(2, 'mars', MapData.maps['mars']!),
-                    _buildAnimatedCard(3, 'venus', MapData.maps['venus']!),
-                    _buildAnimatedCard(4, 'earth', MapData.maps['earth']!),
-                    _buildAnimatedCard(5, 'saturn', MapData.maps['saturn']!),
-                    _buildAnimatedCard(6, 'neptune', MapData.maps['neptune']!),
-                    _buildAnimatedCard(7, 'jupiter', MapData.maps['jupiter']!),
+                    const Text('🌌', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Choose Your World',
+                      style: GoogleFonts.fredoka(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text('🌌', style: TextStyle(fontSize: 20)),
                   ],
                 ),
               ),
               
-              // Cute Custom Gravity Button
+              const SizedBox(height: 20),
+              
+              // Swipe hint with arrows
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.arrow_back_ios, color: Colors.white.withOpacity(0.7), size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Swipe to explore worlds',
+                    style: GoogleFonts.bubblegumSans(
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.9),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.7), size: 20),
+                ],
+              ),
+              
+              const SizedBox(height: 30),
+              
+              // Carousel PageView
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                    SoundManager().playButton();
+                  },
+                  itemCount: _worldKeys.length,
+                  itemBuilder: (context, index) {
+                    return _buildWorldCard(index);
+                  },
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Page Indicators
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _worldKeys.length,
+                  (index) => _buildPageIndicator(index),
+                ),
+              ),
+              
+              const SizedBox(height: 25),
+              
+              // Custom Gravity Button
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(35),
@@ -187,6 +289,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                     child: InkWell(
                       borderRadius: BorderRadius.circular(35),
                       onTap: () {
+                        SoundManager().playButton();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -195,37 +298,30 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                         );
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.3),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Text('🧪', style: TextStyle(fontSize: 24)),
+                              child: const Text('🧪', style: TextStyle(fontSize: 20)),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             Text(
                               'CUSTOM GRAVITY LAB',
                               style: GoogleFonts.fredoka(
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
-                                letterSpacing: 1.5,
-                                shadows: const [
-                                  Shadow(
-                                    offset: Offset(2, 2),
-                                    blurRadius: 4,
-                                    color: Colors.black26,
-                                  ),
-                                ],
+                                letterSpacing: 1.2,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 28),
+                            const SizedBox(width: 6),
+                            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
                           ],
                         ),
                       ),
@@ -234,289 +330,414 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                 ),
               ),
               
-              const SizedBox(height: 15),
-              // Cute instructions box
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 25),
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.purple.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFFFF69B4),
-                            const Color(0xFFFFB6C1),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.touch_app, color: Colors.white, size: 24),
-                    ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Text(
-                        'Tap any planet to start!',
-                        style: GoogleFonts.bubblegumSans(
-                          color: const Color(0xFFFF69B4),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    const Text('✨', style: TextStyle(fontSize: 24)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
             ],
           ),
         ),
       ),
-    ),
     );
   }
-
-  Widget _buildAnimatedCard(int index, String mapKey, MapData mapData) {
-    return ScaleTransition(
-      scale: _animations[index],
-      child: MapCard(
-        mapKey: mapKey,
-        mapData: mapData,
+  
+  Widget _buildPageIndicator(int index) {
+    final isActive = index == _currentPage;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      width: isActive ? 24 : 8,
+      height: 8,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        color: isActive ? Colors.white : Colors.white.withOpacity(0.4),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.6),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                ),
+              ]
+            : [],
+      ),
+    );
+  }
+  
+  Widget _buildWorldCard(int index) {
+    final worldKey = _worldKeys[index];
+    final mapData = MapData.maps[worldKey]!;
+    final mapImagePath = _worldMapImages[worldKey]!;
+    
+    // Calculate scale based on distance from center
+    double scale = 1.0;
+    if (_pageController.position.haveDimensions) {
+      final page = _currentPageValue;
+      final diff = (page - index).abs();
+      scale = 1.0 - (diff * 0.2).clamp(0.0, 0.3);
+    }
+    
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: scale, end: scale),
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+      builder: (context, scaleValue, child) {
+        return Transform.scale(
+          scale: scaleValue,
+          child: child,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+        child: WorldCarouselCard(
+          worldKey: worldKey,
+          mapData: mapData,
+          mapImagePath: mapImagePath,
+          isCenter: index == _currentPage,
+        ),
       ),
     );
   }
 }
 
-class MapCard extends StatefulWidget {
-  final String mapKey;
+class WorldCarouselCard extends StatefulWidget {
+  final String worldKey;
   final MapData mapData;
+  final String mapImagePath;
+  final bool isCenter;
 
-  const MapCard({
+  const WorldCarouselCard({
     super.key,
-    required this.mapKey,
+    required this.worldKey,
     required this.mapData,
+    required this.mapImagePath,
+    required this.isCenter,
   });
 
   @override
-  State<MapCard> createState() => _MapCardState();
+  State<WorldCarouselCard> createState() => _WorldCarouselCardState();
 }
 
-class _MapCardState extends State<MapCard> {
+class _WorldCarouselCardState extends State<WorldCarouselCard> 
+    with TickerProviderStateMixin {
   bool _isPressed = false;
+  late AnimationController _floatController;
+  late Animation<double> _floatAnimation;
+  late AnimationController _backgroundScrollController;
+  late Animation<double> _backgroundScrollAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _floatController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _floatAnimation = Tween<double>(begin: -8, end: 8).animate(
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+    );
+    
+    // Background scroll animation for parallax effect
+    _backgroundScrollController = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    )..repeat();
+    
+    _backgroundScrollAnimation = Tween<double>(begin: 0, end: 1).animate(
+      _backgroundScrollController,
+    );
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    _backgroundScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
-      onTap: () {
-        // Haptic feedback would go here
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        // Navigate to game
+        SoundManager().playButton();
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => GameScreen(
-              mapKey: widget.mapKey,
+              mapKey: widget.worldKey,
               mapData: widget.mapData,
             ),
           ),
         );
       },
+      onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedScale(
         scale: _isPressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 150),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: widget.mapData.primaryColor.withOpacity(0.3),
-                blurRadius: _isPressed ? 10 : 20,
-                spreadRadius: _isPressed ? 2 : 5,
-                offset: Offset(0, _isPressed ? 4 : 8),
+                color: widget.mapData.primaryColor.withOpacity(0.4),
+                blurRadius: widget.isCenter ? 30 : 15,
+                spreadRadius: widget.isCenter ? 8 : 3,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(30),
             child: Stack(
               children: [
-                // Background with gradient
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: _getGradientColors(widget.mapKey),
-                    ),
+                // Scrolling Background Image Layer (looping)
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: _backgroundScrollAnimation,
+                    builder: (context, child) {
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          final imageWidth = constraints.maxWidth;
+                          final offset = _backgroundScrollAnimation.value * imageWidth;
+                          
+                          return Stack(
+                            children: [
+                              // First background image
+                              Positioned(
+                                left: -offset,
+                                top: 0,
+                                child: Image.asset(
+                                  widget.mapData.backgroundImage,
+                                  width: imageWidth,
+                                  height: constraints.maxHeight,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    // Fallback to gradient if image not found
+                                    return Container(
+                                      width: imageWidth,
+                                      height: constraints.maxHeight,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: _getGradientColors(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // Second background image for seamless loop
+                              Positioned(
+                                left: imageWidth - offset,
+                                top: 0,
+                                child: Image.asset(
+                                  widget.mapData.backgroundImage,
+                                  width: imageWidth,
+                                  height: constraints.maxHeight,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: imageWidth,
+                                      height: constraints.maxHeight,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: _getGradientColors(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
                 
-                // Planet visual in background
-                Positioned(
-                  top: -30,
-                  right: -30,
+                // Semi-transparent gradient overlay for better contrast
+                Positioned.fill(
                   child: Container(
-                    width: 120,
-                    height: 120,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: _getPlanetColors(widget.mapKey),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.2),
+                          Colors.black.withOpacity(0.3),
+                        ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: widget.mapData.primaryColor.withOpacity(0.4),
-                          blurRadius: 30,
-                          spreadRadius: 10,
-                        ),
-                      ],
                     ),
                   ),
                 ),
                 
-                // Decorative elements based on environment
-                _buildEnvironmentDecoration(widget.mapKey),
-                
-                // Content overlay with better contrast
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.1),
-                        Colors.black.withOpacity(0.6),
-                      ],
+                // Animated stars background for space theme
+                if (widget.worldKey == 'space')
+                  Positioned.fill(
+                    child: AnimatedBuilder(
+                      animation: _floatController,
+                      builder: (context, child) {
+                        return CustomPaint(
+                          painter: StarsPainter(animationValue: _floatAnimation.value),
+                        );
+                      },
                     ),
                   ),
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Icon badge with planet emoji
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.3),
-                              Colors.white.withOpacity(0.1),
+                
+                // Floating world map PNG image
+                Center(
+                  child: AnimatedBuilder(
+                    animation: _floatAnimation,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, _floatAnimation.value),
+                        child: child,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      child: Image.asset(
+                        widget.mapImagePath,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Fallback to emoji if image not found
+                          return Text(
+                            widget.mapData.icon,
+                            style: const TextStyle(fontSize: 120),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // Semi-transparent overlay at bottom
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
+                          Colors.black.withOpacity(0.85),
+                        ],
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // World name - make it responsive
+                        Text(
+                          widget.mapData.name.toUpperCase(),
+                          style: GoogleFonts.fredoka(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 1.2,
+                            shadows: [
+                              Shadow(
+                                offset: const Offset(2, 2),
+                                blurRadius: 8,
+                                color: widget.mapData.primaryColor.withOpacity(0.8),
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(2, 2),
-                            ),
-                          ],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        child: Text(
-                          widget.mapData.icon,
-                          style: const TextStyle(fontSize: 32),
-                        ),
-                      ),
-                      const Spacer(),
-                      
-                      // Environment name with better styling
-                      Text(
-                        widget.mapData.name.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 1.2,
-                          shadows: [
-                            Shadow(
-                              offset: Offset(2, 2),
-                              blurRadius: 6,
-                              color: Colors.black87,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      
-                      // Gravity value with icon
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.95),
-                              Colors.white.withOpacity(0.85),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 4,
-                              offset: const Offset(1, 1),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                        const SizedBox(height: 8),
+                        
+                        // Gravity info with icon - use Wrap for better overflow handling
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
-                            Icon(
-                              Icons.speed,
-                              size: 14,
-                              color: widget.mapData.primaryColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${widget.mapData.gravity} m/s²',
-                              style: TextStyle(
-                                fontSize: 12,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
                                 color: widget.mapData.primaryColor,
-                                fontWeight: FontWeight.bold,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: widget.mapData.primaryColor.withOpacity(0.5),
+                                    blurRadius: 6,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.speed,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${widget.mapData.gravity} m/s²',
+                                    style: GoogleFonts.fredoka(
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            
+                            // Play button hint
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                              ),
+                              child: const Icon(
+                                Icons.play_arrow_rounded,
+                                color: Colors.white,
+                                size: 18,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      
-                      // Description
-                      Text(
-                        widget.mapData.description,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Colors.white,
-                          height: 1.2,
-                          fontWeight: FontWeight.w500,
-                          shadows: [
-                            Shadow(
-                              offset: Offset(1, 1),
-                              blurRadius: 4,
-                              color: Colors.black87,
-                            ),
-                          ],
+                        
+                        const SizedBox(height: 8),
+                        
+                        // Description
+                        Text(
+                          widget.mapData.description,
+                          style: GoogleFonts.bubblegumSans(
+                            fontSize: 13,
+                            color: Colors.white.withOpacity(0.9),
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
+                
+                // Optional: Lock icon overlay for locked worlds
+                // Uncomment when implementing unlock system
+                // if (!_isUnlocked(widget.worldKey))
+                //   _buildLockedOverlay(),
               ],
             ),
           ),
@@ -524,9 +745,9 @@ class _MapCardState extends State<MapCard> {
       ),
     );
   }
-
-  List<Color> _getGradientColors(String mapKey) {
-    switch (mapKey) {
+  
+  List<Color> _getGradientColors() {
+    switch (widget.worldKey) {
       case 'space':
         return [const Color(0xFF0F2027), const Color(0xFF203A43), const Color(0xFF2C5364)];
       case 'moon':
@@ -547,119 +768,85 @@ class _MapCardState extends State<MapCard> {
         return [Colors.blue, Colors.purple];
     }
   }
-
-  List<Color> _getPlanetColors(String mapKey) {
-    switch (mapKey) {
-      case 'space':
-        return [const Color(0xFF1a1a4e), const Color(0xFF0a0a2e)];
-      case 'moon':
-        return [const Color(0xFFE0E0E0), const Color(0xFF9E9E9E), const Color(0xFF616161)];
-      case 'mars':
-        return [const Color(0xFFE57373), const Color(0xFFD32F2F), const Color(0xFF8B0000)];
-      case 'venus':
-        return [const Color(0xFFFFEB3B), const Color(0xFFFFC107), const Color(0xFFFF8F00)];
-      case 'earth':
-        return [const Color(0xFF64B5F6), const Color(0xFF4CAF50), const Color(0xFF2E7D32)];
-      case 'saturn':
-        return [const Color(0xFFFFF59D), const Color(0xFFFFEB3B), const Color(0xFFE6C300)];
-      case 'neptune':
-        return [const Color(0xFF90CAF9), const Color(0xFF2196F3), const Color(0xFF0D47A1)];
-      case 'jupiter':
-        return [const Color(0xFFFFCC80), const Color(0xFFFF9800), const Color(0xFFE65100)];
-      default:
-        return [Colors.purple, Colors.deepPurple];
-    }
-  }
-
-  Widget _buildEnvironmentDecoration(String mapKey) {
-    switch (mapKey) {
-      case 'space':
-        return _buildSpaceDecoration();
-      case 'moon':
-        return _buildMoonDecoration();
-      case 'mars':
-        return _buildMarsDecoration();
-      case 'venus':
-        return _buildVenusDecoration();
-      case 'earth':
-        return _buildEarthDecoration();
-      case 'saturn':
-        return _buildSaturnDecoration();
-      case 'neptune':
-        return _buildNeptuneDecoration();
-      case 'jupiter':
-        return _buildJupiterDecoration();
-      default:
-        return const SizedBox();
-    }
-  }
-
-  Widget _buildEarthDecoration() {
+  
+  /* Optional method for locked worlds - uncomment when implementing unlock system
+  Widget _buildLockedOverlay() {
     return Positioned.fill(
-      child: CustomPaint(
-        painter: CloudsPainter(),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white.withOpacity(0.5), width: 3),
+                ),
+                child: const Icon(
+                  Icons.lock_rounded,
+                  size: 50,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 15),
+              Text(
+                'LOCKED',
+                style: GoogleFonts.fredoka(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
-
-  Widget _buildMoonDecoration() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: CratersPainter(),
-      ),
-    );
-  }
-
-  Widget _buildMarsDecoration() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: MarsDesertPainter(),
-      ),
-    );
-  }
-
-  Widget _buildVenusDecoration() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: VenusCloudsPainter(),
-      ),
-    );
-  }
-
-  Widget _buildSaturnDecoration() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: SaturnRingsPainter(),
-      ),
-    );
-  }
-
-  Widget _buildNeptuneDecoration() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: NeptuneStormPainter(),
-      ),
-    );
-  }
-
-  Widget _buildJupiterDecoration() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: StormPainter(),
-      ),
-    );
-  }
-
-  Widget _buildSpaceDecoration() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: StarsPainter(),
-      ),
-    );
-  }
+  */
 }
 
-// Custom painters for decorative elements
+// Updated Stars Painter with animation
+class StarsPainter extends CustomPainter {
+  final double animationValue;
+  
+  StarsPainter({this.animationValue = 0});
+  
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.8)
+      ..style = PaintingStyle.fill;
+
+    final random = math.Random(42);
+    for (int i = 0; i < 30; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final radius = random.nextDouble() * 1.5 + 0.5;
+      
+      // Add slight movement to stars
+      final offsetY = (i % 2 == 0 ? 1 : -1) * animationValue * 0.1;
+      
+      canvas.drawCircle(
+        Offset(x, y + offsetY),
+        radius,
+        paint..color = Colors.white.withOpacity(0.3 + random.nextDouble() * 0.6),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(StarsPainter oldDelegate) => oldDelegate.animationValue != animationValue;
+}
+
+// Keep old custom painter classes for potential future use
 class CloudsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -667,7 +854,6 @@ class CloudsPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.15)
       ..style = PaintingStyle.fill;
 
-    // Draw simple cloud shapes
     canvas.drawCircle(Offset(size.width * 0.3, size.height * 0.3), 20, paint);
     canvas.drawCircle(Offset(size.width * 0.7, size.height * 0.5), 25, paint);
     canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.7), 18, paint);
@@ -684,7 +870,6 @@ class CratersPainter extends CustomPainter {
       ..color = Colors.black.withOpacity(0.2)
       ..style = PaintingStyle.fill;
 
-    // Draw crater circles
     canvas.drawCircle(Offset(size.width * 0.7, size.height * 0.3), 15, paint);
     canvas.drawCircle(Offset(size.width * 0.3, size.height * 0.6), 10, paint);
     canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.7), 8, paint);
@@ -702,7 +887,6 @@ class StormPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
-    // Draw swirling lines
     final path = Path();
     path.moveTo(0, size.height * 0.5);
     path.quadraticBezierTo(
@@ -716,28 +900,6 @@ class StormPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class StarsPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.6)
-      ..style = PaintingStyle.fill;
-
-    // Draw small stars
-    final random = math.Random(42);
-    for (int i = 0; i < 15; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 1.5 + 0.5;
-      canvas.drawCircle(Offset(x, y), radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// Mars desert terrain painter
 class MarsDesertPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -745,7 +907,6 @@ class MarsDesertPainter extends CustomPainter {
       ..color = Colors.black.withOpacity(0.15)
       ..style = PaintingStyle.fill;
 
-    // Draw desert dunes
     final path = Path();
     path.moveTo(0, size.height * 0.7);
     path.quadraticBezierTo(
@@ -766,7 +927,6 @@ class MarsDesertPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Venus atmosphere painter
 class VenusCloudsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -774,7 +934,6 @@ class VenusCloudsPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.2)
       ..style = PaintingStyle.fill;
 
-    // Draw thick atmospheric clouds
     canvas.drawOval(
       Rect.fromLTWH(size.width * 0.1, size.height * 0.2, size.width * 0.6, 30),
       paint,
@@ -793,7 +952,6 @@ class VenusCloudsPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Saturn rings painter
 class SaturnRingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -802,7 +960,6 @@ class SaturnRingsPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
 
-    // Draw concentric rings
     final center = Offset(size.width * 0.7, size.height * 0.3);
     canvas.drawOval(
       Rect.fromCenter(center: center, width: 60, height: 15),
@@ -822,7 +979,6 @@ class SaturnRingsPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Neptune storm painter
 class NeptuneStormPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -830,7 +986,6 @@ class NeptuneStormPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.15)
       ..style = PaintingStyle.fill;
 
-    // Draw great dark spot (storm)
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset(size.width * 0.6, size.height * 0.4),
@@ -840,7 +995,6 @@ class NeptuneStormPainter extends CustomPainter {
       paint,
     );
 
-    // Draw swirling patterns
     final swirl = Paint()
       ..color = Colors.white.withOpacity(0.1)
       ..style = PaintingStyle.stroke
@@ -858,3 +1012,4 @@ class NeptuneStormPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+

@@ -8,7 +8,7 @@ class SoundManager {
   final AudioPlayer _flapPlayer = AudioPlayer();
   final AudioPlayer _scorePlayer = AudioPlayer();
   final AudioPlayer _hitPlayer = AudioPlayer();
-  final AudioPlayer _achievementPlayer = AudioPlayer();
+  final AudioPlayer _buttonPlayer = AudioPlayer();
   final AudioPlayer _musicPlayer = AudioPlayer();
 
   bool _soundEnabled = true;
@@ -25,7 +25,7 @@ class SoundManager {
   void toggleMusic() {
     _musicEnabled = !_musicEnabled;
     if (_musicEnabled) {
-      playBackgroundMusic();
+      playSplashMusic();
     } else {
       stopBackgroundMusic();
     }
@@ -39,17 +39,17 @@ class SoundManager {
       await _flapPlayer.setReleaseMode(ReleaseMode.stop);
       await _scorePlayer.setReleaseMode(ReleaseMode.stop);
       await _hitPlayer.setReleaseMode(ReleaseMode.stop);
-      await _achievementPlayer.setReleaseMode(ReleaseMode.stop);
+      await _buttonPlayer.setReleaseMode(ReleaseMode.stop);
       
       // Set background music to loop
       await _musicPlayer.setReleaseMode(ReleaseMode.loop);
       await _musicPlayer.setVolume(0.15); // Lower volume for background music
       
       // Set volumes for sound effects
-      await _flapPlayer.setVolume(0.3); // Subtle swoosh sound
-      await _scorePlayer.setVolume(0.6);
-      await _hitPlayer.setVolume(0.7);
-      await _achievementPlayer.setVolume(0.8);
+      await _flapPlayer.setVolume(0.4); // Woosh sound
+      await _scorePlayer.setVolume(0.5); // Coin received sound
+      await _hitPlayer.setVolume(0.6); // Lose sound
+      await _buttonPlayer.setVolume(0.5); // Button click sound
       
       _initialized = true;
     } catch (e) {
@@ -58,17 +58,35 @@ class SoundManager {
     }
   }
 
-  Future<void> playBackgroundMusic() async {
+  // Play Peppy Pals music on splash/menu screens
+  Future<void> playSplashMusic() async {
     if (!_musicEnabled || !_initialized) return;
     try {
-      // Using local audio file - Peppy Pals music
-      // Sweet and playful melody that loops continuously
+      await _musicPlayer.stop();
       await _musicPlayer.play(AssetSource(
         'audio/peppy-pals-just-playin-317068.mp3'
       ));
     } catch (e) {
-      print('Error playing background music: $e');
+      print('Error playing splash music: $e');
     }
+  }
+
+  // Play Ukulele music during gameplay
+  Future<void> playGameMusic() async {
+    if (!_musicEnabled || !_initialized) return;
+    try {
+      await _musicPlayer.stop();
+      await _musicPlayer.play(AssetSource(
+        'audio/ukulele-ukulele-joyful-cute-music-345390.mp3'
+      ));
+    } catch (e) {
+      print('Error playing game music: $e');
+    }
+  }
+
+  // Legacy method for backward compatibility
+  Future<void> playBackgroundMusic() async {
+    await playSplashMusic();
   }
 
   Future<void> pauseBackgroundMusic() async {
@@ -96,52 +114,65 @@ class SoundManager {
     }
   }
 
+  // Woosh sound when tapping/flapping
   Future<void> playFlap() async {
     if (!_soundEnabled || !_initialized) return;
     try {
-      // Subtle swoosh sound - not distracting
-      await _flapPlayer.stop(); // Stop previous sound
-      await _flapPlayer.play(UrlSource(
-        'https://assets.mixkit.co/active_storage/sfx/2031/2031-preview.mp3'
+      await _flapPlayer.stop();
+      await _flapPlayer.play(AssetSource(
+        'audio/sfx/woosh-230554.mp3'
       ));
     } catch (e) {
       print('Error playing flap sound: $e');
     }
   }
 
+  // Coin received sound when passing a pipe
   Future<void> playScore() async {
     if (!_soundEnabled || !_initialized) return;
     try {
-      // Positive ding/coin sound for scoring
       await _scorePlayer.stop();
-      await _scorePlayer.play(UrlSource(
-        'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3'
+      await _scorePlayer.play(AssetSource(
+        'audio/sfx/coin-recieved-230517.mp3'
       ));
     } catch (e) {
       print('Error playing score sound: $e');
     }
   }
 
+  // Lose sound when hitting obstacle
   Future<void> playHit() async {
     if (!_soundEnabled || !_initialized) return;
     try {
-      // Collision/hit sound effect
       await _hitPlayer.stop();
-      await _hitPlayer.play(UrlSource(
-        'https://assets.mixkit.co/active_storage/sfx/2004/2004-preview.mp3'
+      await _hitPlayer.play(AssetSource(
+        'audio/sfx/lose-sfx-365579.mp3'
       ));
     } catch (e) {
       print('Error playing hit sound: $e');
     }
   }
 
+  // Button click sound for UI interactions
+  Future<void> playButton() async {
+    if (!_soundEnabled || !_initialized) return;
+    try {
+      await _buttonPlayer.stop();
+      await _buttonPlayer.play(AssetSource(
+        'audio/sfx/button-394464.mp3'
+      ));
+    } catch (e) {
+      print('Error playing button sound: $e');
+    }
+  }
+
+  // Achievement sound (reuse coin sound for now)
   Future<void> playAchievement() async {
     if (!_soundEnabled || !_initialized) return;
     try {
-      // Success/achievement fanfare sound
-      await _achievementPlayer.stop();
-      await _achievementPlayer.play(UrlSource(
-        'https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'
+      await _scorePlayer.stop();
+      await _scorePlayer.play(AssetSource(
+        'audio/sfx/coin-recieved-230517.mp3'
       ));
     } catch (e) {
       print('Error playing achievement sound: $e');
@@ -152,27 +183,7 @@ class SoundManager {
     _flapPlayer.dispose();
     _scorePlayer.dispose();
     _hitPlayer.dispose();
-    _achievementPlayer.dispose();
+    _buttonPlayer.dispose();
     _musicPlayer.dispose();
   }
 }
-
-// Sound Effects Attribution:
-// All sounds are from Pixabay (https://pixabay.com/sound-effects/)
-// Licensed under the Pixabay License - Free for commercial and non-commercial use
-// 
-// Current sounds:
-// - Background Music: Upbeat game music
-// - Flap: Wing whoosh sound effect  
-// - Score: Positive ding/coin collection sound
-// - Hit: Collision/impact sound effect
-// - Achievement: Success fanfare sound
-//
-// To use local audio files instead of URLs:
-// 1. Download sound files and add them to assets/sounds/ directory
-// 2. Update pubspec.yaml:
-//    flutter:
-//      assets:
-//        - assets/sounds/
-// 3. Replace UrlSource with AssetSource:
-//    Example: await _flapPlayer.play(AssetSource('sounds/flap.mp3'));

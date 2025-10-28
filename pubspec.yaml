@@ -22,6 +22,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   
-  # Assets folder for audio files
+  # Assets folder for audio files and world maps
   assets:
     - assets/audio/
+    - assets/audio/sfx/
+    - assets/audio/world_backgrounds/
+    - assets/audio/world_maps/
