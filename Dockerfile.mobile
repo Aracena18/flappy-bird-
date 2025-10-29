@@ -1,0 +1,61 @@
+# Use Ubuntu as base image
+FROM ubuntu:22.04
+
+# Avoid tzdata interactive install
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    unzip \
+    xz-utils \
+    zip \
+    openjdk-11-jdk \
+    cmake \
+    ninja-build \
+    pkg-config \
+    libgtk-3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up Android SDK
+ENV ANDROID_SDK_ROOT /opt/android-sdk
+ENV ANDROID_HOME $ANDROID_SDK_ROOT
+ENV PATH ${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
+
+# Download and install Android SDK Command-line Tools
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    cd ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    curl -O https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && \
+    unzip commandlinetools-linux-*_latest.zip && \
+    rm commandlinetools-linux-*_latest.zip && \
+    mv cmdline-tools latest
+
+# Accept Android SDK licenses and install required components
+RUN yes | sdkmanager --licenses
+RUN sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+
+# Install Flutter
+ENV FLUTTER_HOME /opt/flutter
+ENV PATH ${PATH}:${FLUTTER_HOME}/bin
+
+RUN git clone https://github.com/flutter/flutter.git -b stable ${FLUTTER_HOME}
+
+# Run basic check and pre-downloads
+RUN flutter doctor
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the Flutter project files
+COPY . .
+
+# Get Flutter dependencies
+RUN flutter pub get
+
+# Build commands are provided as arguments when running the container
+# Example for Android: docker run [image] flutter build apk --release
+# Example for iOS: docker run [image] flutter build ios --release (requires macOS host)
+
+ENTRYPOINT ["flutter"]
+CMD ["build", "apk", "--release"]

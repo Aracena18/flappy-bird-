@@ -41,14 +41,14 @@ class SoundManager {
       await _hitPlayer.setReleaseMode(ReleaseMode.stop);
       await _buttonPlayer.setReleaseMode(ReleaseMode.stop);
       
-      // Set background music to loop
-      await _musicPlayer.setReleaseMode(ReleaseMode.loop);
-      await _musicPlayer.setVolume(0.15); // Lower volume for background music
+  // Set background music to loop
+  await _musicPlayer.setReleaseMode(ReleaseMode.loop);
+  await _musicPlayer.setVolume(0.15); // Lowered volume for background music (quieter)
       
       // Set volumes for sound effects
       await _flapPlayer.setVolume(0.4); // Woosh sound
-      await _scorePlayer.setVolume(0.5); // Coin received sound
-      await _hitPlayer.setVolume(0.6); // Lose sound
+      await _scorePlayer.setVolume(0.3); // Coin received sound
+      await _hitPlayer.setVolume(0.2); // Lose sound
       await _buttonPlayer.setVolume(0.5); // Button click sound
       
       _initialized = true;
@@ -60,7 +60,14 @@ class SoundManager {
 
   // Play Peppy Pals music on splash/menu screens
   Future<void> playSplashMusic() async {
-    if (!_musicEnabled || !_initialized) return;
+    if (!_musicEnabled) return;
+    // Ensure initialization completed before attempting to play
+    if (!_initialized) {
+      await initialize();
+      // If initialization still failed, abort
+      if (!_initialized) return;
+    }
+
     try {
       await _musicPlayer.stop();
       await _musicPlayer.play(AssetSource(
@@ -73,7 +80,11 @@ class SoundManager {
 
   // Play Ukulele music during gameplay
   Future<void> playGameMusic() async {
-    if (!_musicEnabled || !_initialized) return;
+    if (!_musicEnabled) return;
+    if (!_initialized) {
+      await initialize();
+      if (!_initialized) return;
+    }
     try {
       await _musicPlayer.stop();
       await _musicPlayer.play(AssetSource(

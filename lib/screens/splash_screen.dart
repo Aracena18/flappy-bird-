@@ -49,8 +49,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Navigate to map selection after 3 seconds
-    Timer(const Duration(seconds: 3), () {
+    // Navigate to map selection after ~7 seconds (extended for longer splash)
+    Timer(const Duration(seconds: 7), () {
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -81,6 +81,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  // Responsive logo size: ~22% of width, clamped between 80 and 150
+  double logoSize = screenWidth * 0.22;
+  if (logoSize > 150) logoSize = 150;
+  if (logoSize < 80) logoSize = 80;
+
     return GestureDetector(
       onTap: _startMusic,
       child: Scaffold(
@@ -124,32 +130,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Super cute bouncing bird
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.3),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orange.withOpacity(0.5),
-                              blurRadius: 40,
-                              spreadRadius: 15,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.flutter_dash,
-                          size: 80,
-                          color: Colors.white,
+                      // Game logo (raw image, no background)
+                      SizedBox(
+                        height: logoSize,
+                        child: Image.asset(
+                          'assets/icons/app_icon.png',
+                          height: logoSize,
+                          fit: BoxFit.contain,
                         ),
                       ),
                       const SizedBox(height: 30),
                       
-                      // Cute game title with bubble effect
+                      // Cute game title with bubble effect (responsive)
                       Center(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(50),
@@ -161,38 +156,54 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                               ),
                             ],
                           ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Shadow text
-                              Text(
-                                'FLAPPY BIRD',
-                                style: GoogleFonts.fredoka(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w900,
-                                  foreground: Paint()
-                                    ..style = PaintingStyle.stroke
-                                    ..strokeWidth = 8
-                                    ..color = const Color(0xFFFF1493),
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                              // Main text with gradient
-                              ShaderMask(
-                                shaderCallback: (bounds) => const LinearGradient(
-                                  colors: [Color(0xFFFFFFFF), Color(0xFFFFF0F5)],
-                                ).createShader(bounds),
-                                child: Text(
-                                  'FLAPPY BIRD',
-                                  style: GoogleFonts.fredoka(
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                    letterSpacing: 2,
+                          // Limit title width to avoid wrapping on small screens
+                          child: SizedBox(
+                            width: screenWidth * 0.8,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Shadow text (stroke)
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'FLAPPY BIRD',
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.fredoka(
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.w900,
+                                      foreground: Paint()
+                                        ..style = PaintingStyle.stroke
+                                        ..strokeWidth = 8
+                                        ..color = const Color(0xFFFF1493),
+                                      letterSpacing: 2,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                // Main text with gradient
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: ShaderMask(
+                                    shaderCallback: (bounds) => const LinearGradient(
+                                      colors: [Color(0xFFFFFFFF), Color(0xFFFFF0F5)],
+                                    ).createShader(bounds),
+                                    child: Text(
+                                      'FLAPPY BIRD',
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.fredoka(
+                                        fontSize: 48,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

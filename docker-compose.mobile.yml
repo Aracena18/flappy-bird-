@@ -1,0 +1,12 @@
+services:
+  mobile-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.mobile
+    volumes:
+      - ./build/:/app/build/
+    environment:
+      - FLUTTER_HOME=/opt/flutter
+      - ANDROID_SDK_ROOT=/opt/android-sdk
+    # You can override the default command (build apk) in docker-compose
+    # command: ["build", "appbundle", "--release"]

@@ -1,0 +1,14 @@
+services:
+  flappy-bird-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flappy-bird-physics
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+    labels:
+      - "com.example.description=Flappy Bird Physics Game"
+      - "com.example.version=1.0.0"

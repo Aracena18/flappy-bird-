@@ -85,55 +85,39 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
           child: Column(
             children: [
               const SizedBox(height: 15),
-              // Header with Achievements Button
+              // Header with app icon (left) and achievements button (right)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Logo
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.pink.withOpacity(0.5),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFFFF69B4), Color(0xFFFFB6C1)],
-                        ).createShader(bounds),
-                        child: Text(
-                          'FLAPPY BIRD',
-                          style: GoogleFonts.fredoka(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 1.2,
-                          ),
+                    // App icon on the left (plain image, no circular background)
+                    SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Image.asset(
+                          'assets/icons/app_icon.png',
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ),
-                    // Achievements Button
+
+                    // Achievements button (icon only)
                     Container(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [
-                            const Color(0xFFFFD700),
-                            const Color(0xFFFFB6C1),
+                            Color(0xFFFFD700),
+                            Color(0xFFFFB6C1),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.yellow.withOpacity(0.4),
-                            blurRadius: 15,
+                            blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
                         ],
@@ -141,7 +125,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                           onTap: () {
                             SoundManager().playButton();
                             Navigator.push(
@@ -151,22 +135,12 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                               ),
                             );
                           },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text('🏆', style: TextStyle(fontSize: 18)),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Achievements',
-                                  style: GoogleFonts.fredoka(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
+                          child: const Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Icon(
+                              Icons.emoji_events,
+                              color: Colors.white,
+                              size: 20,
                             ),
                           ),
                         ),
