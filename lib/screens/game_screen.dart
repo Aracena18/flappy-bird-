@@ -12,6 +12,7 @@ import '../utils/achievement_manager.dart';
 import '../utils/particle_system.dart';
 import '../utils/sound_manager.dart';
 import '../widgets/game_painter.dart';
+import '../widgets/physics_quiz_dialog.dart';
 
 enum GameState { ready, playing, paused, gameOver }
 
@@ -48,6 +49,7 @@ class _GameScreenState extends State<GameScreen> {
   bool _audioStarted = false;
   double backgroundOffset = 0; // For scrolling background
   BirdCustomization? _birdCustomization;
+  bool hasUsedRevival = false; // Track if player already used quiz revival
 
   @override
   void initState() {
@@ -92,6 +94,7 @@ class _GameScreenState extends State<GameScreen> {
     pipes.clear();
     score = 0;
     gameState = GameState.ready;
+    hasUsedRevival = false; // Reset revival flag for new game
   }
 
   void _startGame() {
@@ -211,6 +214,11 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {
       gameState = GameState.gameOver;
     });
+
+    // Show quiz revival dialog if not already used in this game
+    if (!hasUsedRevival) {
+      _showQuizRevivalDialog();
+    }
   }
 
   void _flap() {
@@ -267,6 +275,38 @@ class _GameScreenState extends State<GameScreen> {
     // Generate initial pipes
     _generatePipes();
     // Start game loop immediately
+    gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      if (gameState == GameState.playing) {
+        _update();
+      }
+    });
+  }
+
+  void _showQuizRevivalDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PhysicsQuizDialog(
+        soundManager: soundManager,
+        onRevive: _reviveBird,
+        onGameEnd: () {
+          setState(() {
+            gameState = GameState.gameOver;
+          });
+        },
+      ),
+    );
+  }
+
+  void _reviveBird() {
+    setState(() {
+      hasUsedRevival = true;
+      gameState = GameState.playing;
+      // Reset bird position and velocity
+      bird.reset(MediaQuery.of(context).size.height);
+    });
+
+    // Restart game loop
     gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
       if (gameState == GameState.playing) {
         _update();
