@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/physics_quiz.dart';
@@ -26,6 +28,10 @@ class _PhysicsQuizDialogState extends State<PhysicsQuizDialog>
   bool showResult = false;
   bool isCorrect = false;
   late AnimationController _animationController;
+  
+  // Timer variables
+  late Timer _countdownTimer;
+  int _remainingSeconds = 15;
 
   @override
   void initState() {
@@ -35,11 +41,34 @@ class _PhysicsQuizDialogState extends State<PhysicsQuizDialog>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     )..forward();
+    
+    // Start countdown timer
+    _startCountdownTimer();
+  }
+
+  void _startCountdownTimer() {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _remainingSeconds--;
+      });
+      
+      // Time expired - auto-end game
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        if (!showResult && mounted) {
+          // Auto-end game if time runs out without answering
+          widget.soundManager.playHit();
+          Navigator.pop(context);
+          widget.onGameEnd();
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _countdownTimer.cancel();
     super.dispose();
   }
 
@@ -99,7 +128,7 @@ class _PhysicsQuizDialogState extends State<PhysicsQuizDialog>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
+              // Header with Timer
               if (!showResult)
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -110,21 +139,58 @@ class _PhysicsQuizDialogState extends State<PhysicsQuizDialog>
                     color: const Color(0xFF3498DB).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Row(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.lightbulb,
-                        color: Color(0xFFF39C12),
-                        size: 24,
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.lightbulb,
+                            color: Color(0xFFF39C12),
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Physics Quiz - Revive Chance!',
+                            style: TextStyle(
+                              color: Color(0xFFF39C12),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Physics Quiz - Revive Chance!',
-                        style: TextStyle(
-                          color: Color(0xFFF39C12),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      // Timer
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _remainingSeconds <= 5
+                              ? const Color(0xFFE74C3C).withOpacity(0.8)
+                              : const Color(0xFF27AE60).withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.timer,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$_remainingSeconds s',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
