@@ -50,6 +50,11 @@ class _GameScreenState extends State<GameScreen> {
   double backgroundOffset = 0; // For scrolling background
   BirdCustomization? _birdCustomization;
   bool hasUsedRevival = false; // Track if player already used quiz revival
+  
+  // Immunity system for revival
+  bool isImmune = false;
+  Timer? immunityTimer;
+  int immunityDurationSeconds = 5;
 
   @override
   void initState() {
@@ -95,6 +100,8 @@ class _GameScreenState extends State<GameScreen> {
     score = 0;
     gameState = GameState.ready;
     hasUsedRevival = false; // Reset revival flag for new game
+    isImmune = false; // Reset immunity flag
+    immunityTimer?.cancel(); // Cancel any pending immunity timers
   }
 
   void _startGame() {
@@ -154,13 +161,13 @@ class _GameScreenState extends State<GameScreen> {
         _generatePipes();
       }
 
-      // Check collisions
-      if (_checkCollision()) {
+      // Check collisions (skip if immune)
+      if (!isImmune && _checkCollision()) {
         _gameOver();
       }
 
-      // Check if bird is out of bounds
-      if (bird.y < 0 || bird.y > MediaQuery.of(context).size.height) {
+      // Check if bird is out of bounds (skip if immune)
+      if (!isImmune && (bird.y < 0 || bird.y > MediaQuery.of(context).size.height)) {
         _gameOver();
       }
     });
@@ -304,6 +311,22 @@ class _GameScreenState extends State<GameScreen> {
       gameState = GameState.playing;
       // Reset bird position and velocity
       bird.reset(MediaQuery.of(context).size.height);
+      
+      // Activate immunity for 5 seconds
+      isImmune = true;
+    });
+
+    // Start immunity timer
+    immunityTimer?.cancel();
+    immunityTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      final elapsedSeconds = timer.tick * 0.1;
+      
+      if (elapsedSeconds >= immunityDurationSeconds) {
+        timer.cancel();
+        setState(() {
+          isImmune = false;
+        });
+      }
     });
 
     // Restart game loop
@@ -317,6 +340,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void dispose() {
     gameTimer?.cancel();
+    immunityTimer?.cancel();
     soundManager.stopBackgroundMusic();
     super.dispose();
   }
@@ -372,6 +396,7 @@ class _GameScreenState extends State<GameScreen> {
                   pipes: pipes,
                   mapData: widget.mapData,
                   birdCustomization: _birdCustomization,
+                  isImmune: isImmune,
                 ),
               ),
             ),
