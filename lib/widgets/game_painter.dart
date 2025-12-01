@@ -12,12 +12,14 @@ class GamePainter extends CustomPainter {
   final List<Pipe> pipes;
   final MapData mapData;
   final BirdCustomization? birdCustomization;
+  final bool isImmune;
 
   GamePainter({
     required this.bird,
     required this.pipes,
     required this.mapData,
     this.birdCustomization,
+    this.isImmune = false,
   });
 
   @override
@@ -101,6 +103,27 @@ class GamePainter extends CustomPainter {
         );
 
     final birdType = birdCustomization?.birdIndex ?? 0;
+
+    // Draw immunity shield glow if immune
+    if (isImmune) {
+      final glowPaint = Paint()
+        ..color = Colors.cyan.withOpacity(0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+      
+      canvas.drawCircle(center, radius + 15, glowPaint);
+      
+      // Additional pulsing effect
+      final pulseRadius = radius + 20;
+      final pulsePaint = Paint()
+        ..color = Colors.cyan.withOpacity(0.3)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      
+      canvas.drawCircle(center, pulseRadius, pulsePaint);
+    }
 
     // Shadow for depth
     final shadowPaint = Paint()

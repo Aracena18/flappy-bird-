@@ -12,6 +12,7 @@ import '../utils/achievement_manager.dart';
 import '../utils/particle_system.dart';
 import '../utils/sound_manager.dart';
 import '../widgets/game_painter.dart';
+import '../widgets/physics_quiz_dialog.dart';
 
 enum GameState { ready, playing, paused, gameOver }
 
@@ -48,6 +49,12 @@ class _GameScreenState extends State<GameScreen> {
   bool _audioStarted = false;
   double backgroundOffset = 0; // For scrolling background
   BirdCustomization? _birdCustomization;
+  bool hasUsedRevival = false; // Track if player already used quiz revival
+  
+  // Immunity system for revival
+  bool isImmune = false;
+  Timer? immunityTimer;
+  int immunityDurationSeconds = 5;
 
   @override
   void initState() {
@@ -92,6 +99,9 @@ class _GameScreenState extends State<GameScreen> {
     pipes.clear();
     score = 0;
     gameState = GameState.ready;
+    hasUsedRevival = false; // Reset revival flag for new game
+    isImmune = false; // Reset immunity flag
+    immunityTimer?.cancel(); // Cancel any pending immunity timers
   }
 
   void _startGame() {
@@ -151,13 +161,13 @@ class _GameScreenState extends State<GameScreen> {
         _generatePipes();
       }
 
-      // Check collisions
-      if (_checkCollision()) {
+      // Check collisions (skip if immune)
+      if (!isImmune && _checkCollision()) {
         _gameOver();
       }
 
-      // Check if bird is out of bounds
-      if (bird.y < 0 || bird.y > MediaQuery.of(context).size.height) {
+      // Check if bird is out of bounds (skip if immune)
+      if (!isImmune && (bird.y < 0 || bird.y > MediaQuery.of(context).size.height)) {
         _gameOver();
       }
     });
@@ -211,6 +221,11 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {
       gameState = GameState.gameOver;
     });
+
+    // Show quiz revival dialog if not already used in this game
+    if (!hasUsedRevival) {
+      _showQuizRevivalDialog();
+    }
   }
 
   void _flap() {
@@ -274,9 +289,58 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
+  void _showQuizRevivalDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PhysicsQuizDialog(
+        soundManager: soundManager,
+        onRevive: _reviveBird,
+        onGameEnd: () {
+          setState(() {
+            gameState = GameState.gameOver;
+          });
+        },
+      ),
+    );
+  }
+
+  void _reviveBird() {
+    setState(() {
+      hasUsedRevival = true;
+      gameState = GameState.playing;
+      // Reset bird position and velocity
+      bird.reset(MediaQuery.of(context).size.height);
+      
+      // Activate immunity for 5 seconds
+      isImmune = true;
+    });
+
+    // Start immunity timer
+    immunityTimer?.cancel();
+    immunityTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      final elapsedSeconds = timer.tick * 0.1;
+      
+      if (elapsedSeconds >= immunityDurationSeconds) {
+        timer.cancel();
+        setState(() {
+          isImmune = false;
+        });
+      }
+    });
+
+    // Restart game loop
+    gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      if (gameState == GameState.playing) {
+        _update();
+      }
+    });
+  }
+
   @override
   void dispose() {
     gameTimer?.cancel();
+    immunityTimer?.cancel();
     soundManager.stopBackgroundMusic();
     super.dispose();
   }
@@ -332,6 +396,7 @@ class _GameScreenState extends State<GameScreen> {
                   pipes: pipes,
                   mapData: widget.mapData,
                   birdCustomization: _birdCustomization,
+                  isImmune: isImmune,
                 ),
               ),
             ),
