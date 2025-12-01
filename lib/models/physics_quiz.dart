@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class PhysicsQuizQuestion {
   final String question;
   final List<String> options;
@@ -13,6 +15,7 @@ class PhysicsQuizQuestion {
 }
 
 class PhysicsQuiz {
+  static final Random _random = Random();
   static final List<PhysicsQuizQuestion> questions = [
     PhysicsQuizQuestion(
       question: 'What happens to an object when gravity acts on it?',
@@ -106,9 +109,28 @@ class PhysicsQuiz {
     ),
   ];
 
+  /// Get a completely random question each time with shuffled answer options
   static PhysicsQuizQuestion getRandomQuestion() {
-    final random = DateTime.now().microsecond % questions.length;
-    return questions[random];
+    // Get random question from the list
+    final randomQuestion = questions[_random.nextInt(questions.length)];
+    
+    // Create a shuffled version of options with updated correct answer index
+    final shuffledOptions = List<String>.from(randomQuestion.options);
+    final originalCorrectAnswer = randomQuestion.options[randomQuestion.correctAnswerIndex];
+    
+    // Shuffle the options
+    shuffledOptions.shuffle(_random);
+    
+    // Find new index of correct answer
+    final newCorrectIndex = shuffledOptions.indexOf(originalCorrectAnswer);
+    
+    // Return new question with shuffled options
+    return PhysicsQuizQuestion(
+      question: randomQuestion.question,
+      options: shuffledOptions,
+      correctAnswerIndex: newCorrectIndex,
+      explanation: randomQuestion.explanation,
+    );
   }
 
   static PhysicsQuizQuestion getQuestionByIndex(int index) {
