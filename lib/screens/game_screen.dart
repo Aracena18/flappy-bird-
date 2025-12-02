@@ -7,11 +7,14 @@ import '../models/achievement.dart';
 import '../models/bird.dart';
 import '../models/bird_customization.dart';
 import '../models/map_data.dart';
+import '../models/physics_fact.dart';
 import '../models/pipe.dart';
 import '../utils/achievement_manager.dart';
 import '../utils/particle_system.dart';
 import '../utils/sound_manager.dart';
 import '../widgets/game_painter.dart';
+import '../widgets/physics_fun_fact_widget.dart';
+import '../widgets/physics_quiz_dialog.dart';
 
 enum GameState { ready, playing, paused, gameOver }
 
@@ -48,6 +51,15 @@ class _GameScreenState extends State<GameScreen> {
   bool _audioStarted = false;
   double backgroundOffset = 0; // For scrolling background
   BirdCustomization? _birdCustomization;
+  bool hasUsedRevival = false; // Track if player already used quiz revival
+  
+  // Immunity system for revival
+  bool isImmune = false;
+  Timer? immunityTimer;
+  int immunityDurationSeconds = 5;
+  
+  // Physics fun fact for display
+  PhysicsFact? _currentFunFact;
 
   @override
   void initState() {
@@ -92,6 +104,9 @@ class _GameScreenState extends State<GameScreen> {
     pipes.clear();
     score = 0;
     gameState = GameState.ready;
+    hasUsedRevival = false; // Reset revival flag for new game
+    isImmune = false; // Reset immunity flag
+    immunityTimer?.cancel(); // Cancel any pending immunity timers
   }
 
   void _startGame() {
@@ -151,13 +166,13 @@ class _GameScreenState extends State<GameScreen> {
         _generatePipes();
       }
 
-      // Check collisions
-      if (_checkCollision()) {
+      // Check collisions (skip if immune)
+      if (!isImmune && _checkCollision()) {
         _gameOver();
       }
 
-      // Check if bird is out of bounds
-      if (bird.y < 0 || bird.y > MediaQuery.of(context).size.height) {
+      // Check if bird is out of bounds (skip if immune)
+      if (!isImmune && (bird.y < 0 || bird.y > MediaQuery.of(context).size.height)) {
         _gameOver();
       }
     });
@@ -208,9 +223,17 @@ class _GameScreenState extends State<GameScreen> {
       soundManager.playAchievement();
     }
 
+    // Generate a fun fact for game over screen
+    _currentFunFact = PhysicsFactDatabase.getRandomFact();
+
     setState(() {
       gameState = GameState.gameOver;
     });
+
+    // Show quiz revival dialog if not already used in this game
+    if (!hasUsedRevival) {
+      _showQuizRevivalDialog();
+    }
   }
 
   void _flap() {
@@ -238,6 +261,8 @@ class _GameScreenState extends State<GameScreen> {
       soundManager.pauseBackgroundMusic();
       setState(() {
         gameState = GameState.paused;
+        // Generate a fun fact when pausing
+        _currentFunFact = PhysicsFactDatabase.getRandomFact();
       });
     }
   }
@@ -274,9 +299,58 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
+  void _showQuizRevivalDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PhysicsQuizDialog(
+        soundManager: soundManager,
+        onRevive: _reviveBird,
+        onGameEnd: () {
+          setState(() {
+            gameState = GameState.gameOver;
+          });
+        },
+      ),
+    );
+  }
+
+  void _reviveBird() {
+    setState(() {
+      hasUsedRevival = true;
+      gameState = GameState.playing;
+      // Reset bird position and velocity
+      bird.reset(MediaQuery.of(context).size.height);
+      
+      // Activate immunity for 5 seconds
+      isImmune = true;
+    });
+
+    // Start immunity timer
+    immunityTimer?.cancel();
+    immunityTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      final elapsedSeconds = timer.tick * 0.1;
+      
+      if (elapsedSeconds >= immunityDurationSeconds) {
+        timer.cancel();
+        setState(() {
+          isImmune = false;
+        });
+      }
+    });
+
+    // Restart game loop
+    gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      if (gameState == GameState.playing) {
+        _update();
+      }
+    });
+  }
+
   @override
   void dispose() {
     gameTimer?.cancel();
+    immunityTimer?.cancel();
     soundManager.stopBackgroundMusic();
     super.dispose();
   }
@@ -332,6 +406,7 @@ class _GameScreenState extends State<GameScreen> {
                   pipes: pipes,
                   mapData: widget.mapData,
                   birdCustomization: _birdCustomization,
+                  isImmune: isImmune,
                 ),
               ),
             ),
@@ -345,36 +420,66 @@ class _GameScreenState extends State<GameScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Map Info
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${widget.mapData.icon} ${widget.mapData.name}',
-                                style: const TextStyle(
+                        // Left group: Map Info + Mute Button
+                        Row(
+                          children: [
+                            // Map Info
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${widget.mapData.icon} ${widget.mapData.name}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'g = ${widget.mapData.gravity} m/s²',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            // Mute Button
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    soundManager.toggleMusic();
+                                  });
+                                },
+                                icon: Icon(
+                                  soundManager.musicEnabled
+                                      ? Icons.volume_up
+                                      : Icons.volume_off,
                                   color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  size: 24,
                                 ),
+                                tooltip: soundManager.musicEnabled
+                                    ? 'Mute Music'
+                                    : 'Unmute Music',
                               ),
-                              Text(
-                                'g = ${widget.mapData.gravity} m/s²',
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
 
                         // Score (bigger and centered at top)
@@ -636,25 +741,79 @@ class _GameScreenState extends State<GameScreen> {
             if (gameState == GameState.paused)
               Container(
                 color: Colors.black45,
-                child: const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.pause_circle,
-                        size: 64,
-                        color: Colors.white,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Paused',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.pause_circle,
+                          size: 64,
                           color: Colors.white,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Paused',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Display fun fact if available
+                        if (_currentFunFact != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: PhysicsFunFactWidget(
+                              fact: _currentFunFact!,
+                              onDismiss: () {
+                                setState(() {
+                                  _currentFunFact =
+                                      PhysicsFactDatabase.getRandomFact();
+                                });
+                              },
+                            ),
+                          ),
+                        const SizedBox(height: 32),
+                        // Resume and Menu buttons
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(Icons.home),
+                              label: const Text('Menu'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black54,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                soundManager.playButton();
+                                _resume();
+                              },
+                              icon: const Icon(Icons.play_arrow),
+                              label: const Text('Resume'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -664,159 +823,171 @@ class _GameScreenState extends State<GameScreen> {
               Container(
                 color: Colors.black.withOpacity(0.75),
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Game Over!',
-                        style: TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Game Over!',
+                          style: TextStyle(
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 32),
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white12,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'Final Score',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '$score',
-                              style: const TextStyle(
-                                fontSize: 64,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '${widget.mapData.icon} ${widget.mapData.name}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            Text(
-                              'Gravity: ${widget.mapData.gravity} m/s²',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.white60,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Achievement Notifications
-                      if (newAchievements.isNotEmpty) ...[
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 32),
                         Container(
-                          padding: const EdgeInsets.all(20),
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFFFFD700), // Gold
-                                Color(0xFFFFB6C1), // Pink
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.yellow.withOpacity(0.5),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
+                            color: Colors.white12,
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Column(
                             children: [
                               const Text(
-                                '🎉 NEW ACHIEVEMENTS! 🎉',
+                                'Final Score',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 20,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '$score',
+                                style: const TextStyle(
+                                  fontSize: 64,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              ...newAchievements.map((achievement) => Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 4),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(achievement.icon,
-                                            style:
-                                                const TextStyle(fontSize: 24)),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          achievement.title,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )),
+                              const SizedBox(height: 16),
+                              Text(
+                                '${widget.mapData.icon} ${widget.mapData.name}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              Text(
+                                'Gravity: ${widget.mapData.gravity} m/s²',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white60,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              soundManager.playButton();
-                              _restart();
-                            },
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('Play Again'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: widget.mapData.primaryColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              soundManager.playButton();
-                              Navigator.pop(context);
-                            },
-                            icon: const Icon(Icons.map),
-                            label: const Text('Change Map'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white24,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
+                        // Display fun fact
+                        if (_currentFunFact != null) ...[
+                          const SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: PhysicsFunFactWidget(
+                              fact: _currentFunFact!,
                             ),
                           ),
                         ],
-                      ),
-                    ],
+                        // Achievement Notifications
+                        if (newAchievements.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFFFD700), // Gold
+                                  Color(0xFFFFB6C1), // Pink
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.yellow.withOpacity(0.5),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  '🎉 NEW ACHIEVEMENTS! 🎉',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ...newAchievements.map((achievement) => Padding(
+                                      padding:
+                                          const EdgeInsets.symmetric(vertical: 4),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(achievement.icon,
+                                              style:
+                                                  const TextStyle(fontSize: 24)),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            achievement.title,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )),
+                              ],
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 32),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                soundManager.playButton();
+                                _restart();
+                              },
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Play Again'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: widget.mapData.primaryColor,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                soundManager.playButton();
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(Icons.map),
+                              label: const Text('Change Map'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white24,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

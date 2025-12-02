@@ -10,6 +10,7 @@ import 'achievements_screen.dart';
 import 'bird_customization_screen.dart';
 import 'custom_gravity_screen.dart';
 import 'game_screen.dart';
+import 'physics_facts_screen.dart';
 
 class MapSelectionScreen extends StatefulWidget {
   const MapSelectionScreen({super.key});
@@ -192,6 +193,51 @@ class _MapSelectionScreenState extends State<MapSelectionScreen>
                                 child: Icon(
                                   Icons.emoji_events,
                                   color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Physics Facts button (icon only)
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF3498DB),
+                                Color(0xFF2980B9),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () {
+                                SoundManager().playButton();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const PhysicsFactsScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.all(10),
+                                child: Icon(
+                                  Icons.lightbulb,
+                                  color: Color(0xFFF39C12),
                                   size: 20,
                                 ),
                               ),
