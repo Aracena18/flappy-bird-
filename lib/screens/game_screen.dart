@@ -855,12 +855,6 @@ class _GameScreenState extends State<GameScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: PhysicsFunFactWidget(
                               fact: _currentFunFact!,
-                              onDismiss: () {
-                                setState(() {
-                                  _currentFunFact =
-                                      PhysicsFactDatabase.getRandomFact();
-                                });
-                              },
                             ),
                           ),
                         ],
