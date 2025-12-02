@@ -10,6 +10,7 @@
         "audioplayers",
         "cupertino_icons",
         "flutter",
+        "font_awesome_flutter",
         "google_fonts",
         "shared_preferences"
       ],
@@ -55,6 +56,13 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "font_awesome_flutter",
+      "version": "10.12.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {

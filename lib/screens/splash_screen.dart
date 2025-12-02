@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../utils/sound_manager.dart';
 import 'map_selection_screen.dart';
@@ -13,7 +14,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -23,17 +25,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize audio system
     soundManager.initialize();
-    
+
     // Auto-start music after a brief delay for better compatibility
     Timer(const Duration(milliseconds: 500), () {
       if (mounted) {
         _startMusic();
       }
     });
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -55,8 +57,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const MapSelectionScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const MapSelectionScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
               return FadeTransition(opacity: animation, child: child);
             },
             transitionDuration: const Duration(milliseconds: 800),
@@ -81,232 +85,253 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  // Responsive logo size: ~22% of width, clamped between 80 and 150
-  double logoSize = screenWidth * 0.22;
-  if (logoSize > 150) logoSize = 150;
-  if (logoSize < 80) logoSize = 80;
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Responsive logo size: ~22% of width, clamped between 80 and 150
+    double logoSize = screenWidth * 0.22;
+    if (logoSize > 150) logoSize = 150;
+    if (logoSize < 80) logoSize = 80;
 
     return GestureDetector(
       onTap: _startMusic,
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFFFFB6C1), // Pastel pink
-              const Color(0xFFFFDAE9), // Light pink
-              const Color(0xFFFFF0F5), // Lavender blush
-            ],
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                const Color(0xFFFFB6C1), // Pastel pink
+                const Color(0xFFFFDAE9), // Light pink
+                const Color(0xFFFFF0F5), // Lavender blush
+              ],
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            // Cute floating clouds
-            Positioned(
-              top: 100,
-              left: 50,
-              child: _buildCloud(60),
-            ),
-            Positioned(
-              top: 150,
-              right: 80,
-              child: _buildCloud(80),
-            ),
-            Positioned(
-              top: 250,
-              left: 150,
-              child: _buildCloud(50),
-            ),
-            
-            // Main content
-            Center(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Game logo (raw image, no background)
-                      SizedBox(
-                        height: logoSize,
-                        child: Image.asset(
-                          'assets/icons/app_icon.png',
+          child: Stack(
+            children: [
+              // Cute floating clouds
+              Positioned(
+                top: 100,
+                left: 50,
+                child: _buildCloud(60),
+              ),
+              Positioned(
+                top: 150,
+                right: 80,
+                child: _buildCloud(80),
+              ),
+              Positioned(
+                top: 250,
+                left: 150,
+                child: _buildCloud(50),
+              ),
+
+              // Main content
+              Center(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Game logo (raw image, no background)
+                        SizedBox(
                           height: logoSize,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      
-                      // Cute game title with bubble effect (responsive)
-                      Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(50),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.4),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
+                          child: Image.asset(
+                            'assets/icons/app_icon.png',
+                            height: logoSize,
+                            fit: BoxFit.contain,
                           ),
-                          // Limit title width to avoid wrapping on small screens
-                          child: SizedBox(
-                            width: screenWidth * 0.8,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Shadow text (stroke)
-                                FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    'FLAPPY BIRD',
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.fredoka(
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.w900,
-                                      foreground: Paint()
-                                        ..style = PaintingStyle.stroke
-                                        ..strokeWidth = 8
-                                        ..color = const Color(0xFFFF1493),
-                                      letterSpacing: 2,
-                                    ),
-                                  ),
+                        ),
+                        const SizedBox(height: 30),
+
+                        // Cute game title with bubble effect (responsive)
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(50),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.4),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
                                 ),
-                                // Main text with gradient
-                                FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: ShaderMask(
-                                    shaderCallback: (bounds) => const LinearGradient(
-                                      colors: [Color(0xFFFFFFFF), Color(0xFFFFF0F5)],
-                                    ).createShader(bounds),
+                              ],
+                            ),
+                            // Limit title width to avoid wrapping on small screens
+                            child: SizedBox(
+                              width: screenWidth * 0.8,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Shadow text (stroke)
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
                                     child: Text(
-                                      'FLAPPY BIRD',
+                                      'FLOPPY BERT',
                                       textAlign: TextAlign.center,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.fredoka(
                                         fontSize: 48,
                                         fontWeight: FontWeight.w900,
-                                        color: Colors.white,
+                                        foreground: Paint()
+                                          ..style = PaintingStyle.stroke
+                                          ..strokeWidth = 8
+                                          ..color = const Color(0xFFFF1493),
                                         letterSpacing: 2,
                                       ),
                                     ),
                                   ),
-                                ),
+                                  // Main text with gradient
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: ShaderMask(
+                                      shaderCallback: (bounds) =>
+                                          const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFFFFFF),
+                                          Color(0xFFFFF0F5)
+                                        ],
+                                      ).createShader(bounds),
+                                      child: Text(
+                                        'FLOPPY BERT',
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.fredoka(
+                                          fontSize: 48,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white,
+                                          letterSpacing: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Cute subtitle
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                const Color(0xFFFF69B4), // Hot pink
+                                const Color(0xFFFF1493), // Deep pink
                               ],
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      
-                      // Cute subtitle
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFFFF69B4), // Hot pink
-                              const Color(0xFFFF1493), // Deep pink
+                            borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.pink.withOpacity(0.4),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.pink.withOpacity(0.4),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('💖', style: TextStyle(fontSize: 20)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Physics Adventure',
-                              style: GoogleFonts.bubblegumSans(
-                                fontSize: 22,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text('💖', style: TextStyle(fontSize: 20)),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 60),
-                      
-                      // Cute loading animation with stars
-                      Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              _buildBouncingStar(0),
-                              const SizedBox(width: 15),
-                              _buildBouncingStar(200),
-                              const SizedBox(width: 15),
-                              _buildBouncingStar(400),
+                              FaIcon(FontAwesomeIcons.heart,
+                                  size: 20, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Physics Adventure',
+                                style: GoogleFonts.bubblegumSans(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              FaIcon(FontAwesomeIcons.heart,
+                                  size: 20, color: Colors.white),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          Container(
-                            width: 200,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 60),
+
+                        // Cute loading animation with stars
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildBouncingStar(0),
+                                const SizedBox(width: 15),
+                                _buildBouncingStar(200),
+                                const SizedBox(width: 15),
+                                _buildBouncingStar(400),
+                              ],
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: LinearProgressIndicator(
-                                backgroundColor: Colors.transparent,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  const Color(0xFFFFA500), // Orange
+                            const SizedBox(height: 20),
+                            Container(
+                              width: 200,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: LinearProgressIndicator(
+                                  backgroundColor: Colors.transparent,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    const Color(0xFFFFA500), // Orange
+                                  ),
+                                  minHeight: 8,
                                 ),
-                                minHeight: 8,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(20),
+                          ],
                         ),
-                        child: const Text(
-                          '🎮 Get Ready to Fly! 🎮',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Color(0xFF4A90E2),
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                const Color(0xFFFF69B4), // Hot pink
+                                const Color(0xFFFF1493), // Deep pink
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.pink.withOpacity(0.4),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            'Ready, Set, Bert!',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Color.fromARGB(255, 255, 255, 255),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

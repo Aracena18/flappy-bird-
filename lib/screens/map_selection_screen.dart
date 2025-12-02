@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../models/map_data.dart';
 import '../utils/sound_manager.dart';
@@ -141,10 +142,10 @@ class _MapSelectionScreenState extends State<MapSelectionScreen>
                                   ),
                                 );
                               },
-                              child: const Padding(
-                                padding: EdgeInsets.all(10),
-                                child: Icon(
-                                  Icons.flutter_dash,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: FaIcon(
+                                  FontAwesomeIcons.dove,
                                   color: Colors.white,
                                   size: 20,
                                 ),
@@ -222,10 +223,11 @@ class _MapSelectionScreenState extends State<MapSelectionScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('🌌', style: TextStyle(fontSize: 20)),
+                    const Icon(FontAwesomeIcons.globe,
+                        size: 20, color: Colors.white),
                     const SizedBox(width: 10),
                     Text(
-                      'Choose Your World',
+                      'Map Selection',
                       style: GoogleFonts.fredoka(
                         fontSize: 20,
                         color: Colors.white,
@@ -234,7 +236,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen>
                       ),
                     ),
                     const SizedBox(width: 10),
-                    const Text('🌌', style: TextStyle(fontSize: 20)),
+                    const Icon(FontAwesomeIcons.globe,
+                        size: 20, color: Colors.white),
                   ],
                 ),
               ),
@@ -251,7 +254,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen>
                   Text(
                     'Swipe to explore worlds',
                     style: GoogleFonts.bubblegumSans(
-                      fontSize: 14,
+                      fontSize: 16,
                       color: Colors.white.withOpacity(0.9),
                       fontWeight: FontWeight.w600,
                     ),
@@ -339,8 +342,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen>
                                 color: Colors.white.withOpacity(0.3),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Text('🧪',
-                                  style: TextStyle(fontSize: 20)),
+                              child: const Icon(FontAwesomeIcons.flask,
+                                  size: 20, color: Colors.white),
                             ),
                             const SizedBox(width: 10),
                             Text(
