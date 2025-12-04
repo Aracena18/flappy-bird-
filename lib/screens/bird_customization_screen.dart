@@ -30,9 +30,9 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
       isUnlocked: true,
     ),
     BirdCharacter(
-      name: 'Iron Birdie',
+      name: 'Cybird',
       icon: '🤖',
-      description: 'Metal Scraps',
+      description: 'Half Robot, Half Langgam',
       isUnlocked: true,
     ),
     BirdCharacter(
@@ -62,13 +62,19 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
     BirdCharacter(
       name: 'Lucifer',
       icon: '😇',
-      description: 'Divine Guardian',
+      description: 'The Fallen Angel',
       isUnlocked: true,
     ),
     BirdCharacter(
       name: 'Philippine Blooper',
       icon: '🇵🇭',
       description: 'Guinness World of Bad Records',
+      isUnlocked: true,
+    ),
+    BirdCharacter(
+      name: 'Benedict',
+      icon: '🦅',
+      description: 'John Benedict Bongcac',
       isUnlocked: true,
     ),
   ];
@@ -150,9 +156,9 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
                             ),
                           ),
                           Text(
-                            'Select your character!',
+                            'Use and experience the different bird characters!',
                             style: GoogleFonts.bubblegumSans(
-                              fontSize: 14,
+                              fontSize: 16,
                               color: Colors.white70,
                             ),
                           ),
@@ -210,7 +216,7 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
                       child: Text(
                         _birdCharacters[_selectedBirdIndex].name,
                         style: GoogleFonts.fredoka(
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -224,7 +230,7 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'Select your character!',
+                  'Choose your Bird!',
                   style: GoogleFonts.fredoka(
                     fontSize: 16,
                     color: Colors.white,
@@ -409,7 +415,7 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
                       Text(
                         character.description,
                         style: GoogleFonts.bubblegumSans(
-                          fontSize: 11,
+                          fontSize: 14,
                           color: Colors.white70,
                         ),
                         textAlign: TextAlign.center,
@@ -537,6 +543,9 @@ class CharacterBirdPainter extends CustomPainter {
         break;
       case 7:
         _drawFilipino(canvas, center, radius);
+        break;
+      case 8:
+        _drawBenedict(canvas, center, radius);
         break;
     }
   }
@@ -667,24 +676,64 @@ class CharacterBirdPainter extends CustomPainter {
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, bodyGradient);
 
-    // Muscle definition lines
-    final musclePaint = Paint()
-      ..color = const Color(0xFF1B5E20)
+    // Green curly vine hair slicked back
+    final vineHairPaint = Paint()
+      ..color = const Color(0xFF2E7D32)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5;
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
 
-    // Chest muscles
-    final musclePath = Path();
-    musclePath.moveTo(center.dx, center.dy - radius * 0.5);
-    musclePath.quadraticBezierTo(center.dx - radius * 0.3, center.dy,
-        center.dx - radius * 0.2, center.dy + radius * 0.5);
-    canvas.drawPath(musclePath, musclePaint);
+    // Draw curly vine strands (7 vines) falling backward
+    for (int i = 0; i < 7; i++) {
+      final vinePath = Path();
+      // Calculate position along the curved top of the head
+      final angle = math.pi / 2 + (i - 3) * 0.2; // Spread vines along curve
+      final startX = center.dx + math.cos(angle) * radius;
+      final startY = center.dy - math.sin(angle) * radius;
 
-    final musclePath2 = Path();
-    musclePath2.moveTo(center.dx, center.dy - radius * 0.5);
-    musclePath2.quadraticBezierTo(center.dx + radius * 0.3, center.dy,
-        center.dx + radius * 0.2, center.dy + radius * 0.5);
-    canvas.drawPath(musclePath2, musclePaint);
+      vinePath.moveTo(startX, startY);
+
+      // Slick back and fall - curves going backward and downward (EXTENDED for long hair)
+      vinePath.quadraticBezierTo(
+        startX - radius * 0.15,
+        startY - radius * 0.25,
+        startX - radius * 0.35,
+        startY - radius * 0.15,
+      );
+      vinePath.quadraticBezierTo(
+        startX - radius * 0.5 + radius * 0.08 * (i % 2 == 0 ? 1 : -1),
+        startY,
+        startX - radius * 0.65,
+        startY + radius * 0.15,
+      );
+      vinePath.quadraticBezierTo(
+        startX - radius * 0.75 + radius * 0.1 * (i % 2 == 0 ? -1 : 1),
+        startY + radius * 0.35,
+        startX - radius * 0.8,
+        startY + radius * 0.5,
+      );
+      // Additional curves for longer hair
+      vinePath.quadraticBezierTo(
+        startX - radius * 0.95 + radius * 0.08 * (i % 2 == 0 ? 1 : -1),
+        startY + radius * 0.75,
+        startX - radius * 1.1,
+        startY + radius * 1.0,
+      );
+      vinePath.quadraticBezierTo(
+        startX - radius * 1.25 + radius * 0.12 * (i % 2 == 0 ? -1 : 1),
+        startY + radius * 1.35,
+        startX - radius * 1.4,
+        startY + radius * 1.7,
+      );
+      vinePath.quadraticBezierTo(
+        startX - radius * 1.55 + radius * 0.1 * (i % 2 == 0 ? 1 : -1),
+        startY + radius * 2.1,
+        startX - radius * 1.65,
+        startY + radius * 2.5,
+      );
+
+      canvas.drawPath(vinePath, vineHairPaint);
+    }
 
     // Strong wing
     final wingPaint = Paint()
@@ -699,7 +748,6 @@ class CharacterBirdPainter extends CustomPainter {
     wingPath.lineTo(center.dx - radius * 0.2, center.dy + radius * 0.6);
     wingPath.close();
     canvas.drawPath(wingPath, wingPaint);
-    canvas.drawPath(wingPath, musclePaint);
 
     // Angry eyes
     final eyeWhitePaint = Paint()
@@ -996,20 +1044,20 @@ class CharacterBirdPainter extends CustomPainter {
 
   // Aaron - Gym buff with beard and workout outfit
   void _drawAaron(Canvas canvas, Offset center, double radius) {
-    // Muscular body with tan/peach gradient
+    // Muscular body with black/gray fade gradient
     final bodyGradient = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0xFFFFCC80),
-          const Color(0xFFFF9800),
-          const Color(0xFFF57C00),
+          const Color(0xFF505050),
+          const Color(0xFF303030),
+          const Color(0xFF101010),
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, bodyGradient);
 
     // Muscle definition - arms/pecs
     final musclePaint = Paint()
-      ..color = const Color(0xFFE65100)
+      ..color = const Color(0xFF202020)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
 
@@ -1037,7 +1085,7 @@ class CharacterBirdPainter extends CustomPainter {
 
     // Body hair on lower body (below wings)
     final bodyHairPaint = Paint()
-      ..color = const Color(0xFF212121)
+      ..color = const Color(0xFFFFFFFF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
@@ -1146,53 +1194,62 @@ class CharacterBirdPainter extends CustomPainter {
       bodyHairPaint,
     );
 
-    // Muscular arms/wings - bigger and more prominent
+    // Spiky wings - bigger and more prominent
     final armPaint = Paint()
-      ..shader = LinearGradient(
-        colors: [const Color(0xFFFFCC80), const Color(0xFFF57C00)],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
+      ..color = const Color(0xFF202020)
+      ..style = PaintingStyle.fill;
 
-    final armPath = Path();
-    armPath.moveTo(center.dx - radius * 0.35, center.dy - radius * 0.2);
-    armPath.lineTo(center.dx - radius * 1.3, center.dy + radius * 0.2);
-    armPath.lineTo(center.dx - radius * 1.2, center.dy + radius * 0.6);
-    armPath.lineTo(center.dx - radius * 0.3, center.dy + radius * 0.4);
-    armPath.close();
-    canvas.drawPath(armPath, armPaint);
-    canvas.drawPath(armPath, musclePaint);
+    // Draw spiky wing with multiple sharp points
+    final spikyWingPath = Path();
+    spikyWingPath.moveTo(center.dx - radius * 0.35, center.dy - radius * 0.2);
+    // First spike
+    spikyWingPath.lineTo(center.dx - radius * 0.7, center.dy + radius * 0.05);
+    spikyWingPath.lineTo(center.dx - radius * 0.85, center.dy + radius * 0.15);
+    // Second spike
+    spikyWingPath.lineTo(center.dx - radius * 1.0, center.dy + radius * 0.2);
+    spikyWingPath.lineTo(center.dx - radius * 1.2, center.dy + radius * 0.35);
+    // Third spike
+    spikyWingPath.lineTo(center.dx - radius * 1.15, center.dy + radius * 0.5);
+    spikyWingPath.lineTo(center.dx - radius * 1.25, center.dy + radius * 0.65);
+    // Back to body
+    spikyWingPath.lineTo(center.dx - radius * 0.8, center.dy + radius * 0.55);
+    spikyWingPath.lineTo(center.dx - radius * 0.3, center.dy + radius * 0.4);
+    spikyWingPath.close();
+    canvas.drawPath(spikyWingPath, armPaint);
+    canvas.drawPath(spikyWingPath, musclePaint);
 
     // Bicep bulge - positioned on larger arm
     canvas.drawCircle(
       Offset(center.dx - radius * 0.85, center.dy + radius * 0.25),
       radius * 0.2,
       Paint()
-        ..color = const Color(0xFFE65100)
+        ..color = const Color(0xFF202020)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5,
     );
 
-    // Determined eyes
-    final eyeWhitePaint = Paint()
+    // Glowing white eyes
+    final eyeGlowPaint = Paint()
+      ..color = Colors.white.withOpacity(0.3)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.25, center.dy - radius * 0.35),
+      radius * 0.3,
+      eyeGlowPaint,
+    );
+
+    final eyePaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     canvas.drawCircle(
       Offset(center.dx + radius * 0.25, center.dy - radius * 0.35),
-      radius * 0.25,
-      eyeWhitePaint,
-    );
-
-    final pupilPaint = Paint()
-      ..color = const Color(0xFF4E342E)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(
-      Offset(center.dx + radius * 0.3, center.dy - radius * 0.32),
-      radius * 0.12,
-      pupilPaint,
+      radius * 0.2,
+      eyePaint,
     );
 
     // Determined eyebrow
     final browPaint = Paint()
-      ..color = const Color(0xFF4E342E)
+      ..color = const Color(0xFF909090)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
@@ -1202,9 +1259,9 @@ class CharacterBirdPainter extends CustomPainter {
       browPaint,
     );
 
-    // Beard
+    // Beard (white hair)
     final beardPaint = Paint()
-      ..color = const Color(0xFF3E2723)
+      ..color = const Color(0xFFFFFFFF)
       ..style = PaintingStyle.fill;
 
     // Beard base
@@ -1228,7 +1285,7 @@ class CharacterBirdPainter extends CustomPainter {
 
     // Beard texture lines
     final beardTexture = Paint()
-      ..color = const Color(0xFF1B1B1B)
+      ..color = const Color(0xFFE0E0E0)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     for (int i = 0; i < 4; i++) {
@@ -1240,7 +1297,17 @@ class CharacterBirdPainter extends CustomPainter {
       );
     }
 
-    _drawStandardBeak(canvas, center, radius);
+    // Pure black beak
+    final beakPaint = Paint()
+      ..color = const Color(0xFF000000)
+      ..style = PaintingStyle.fill;
+
+    final beakPath = Path();
+    beakPath.moveTo(center.dx + radius * 0.7, center.dy - 4);
+    beakPath.lineTo(center.dx + radius * 1.2, center.dy);
+    beakPath.lineTo(center.dx + radius * 0.7, center.dy + 4);
+    beakPath.close();
+    canvas.drawPath(beakPath, beakPaint);
 
     // Sweatband on head - positioned higher to avoid wing overlap
     final sweatbandPaint = Paint()
@@ -1406,12 +1473,12 @@ class CharacterBirdPainter extends CustomPainter {
       ..strokeWidth = 2.5;
     canvas.drawCircle(center, radius, bodyOutlinePaint);
 
-    // Blonde hair on top of head
+    // Yellow hair on top of head
     final hairPaint = Paint()
-      ..color = const Color(0xFFFFEB3B)
+      ..color = const Color(0xFFFFD700)
       ..style = PaintingStyle.fill;
 
-    // Hair strands - blonde spiky hair
+    // Hair strands - yellow feather-like hair
     for (int i = 0; i < 5; i++) {
       final hairPath = Path();
       final hairX = center.dx + (i - 2) * radius * 0.25;
@@ -1431,11 +1498,217 @@ class CharacterBirdPainter extends CustomPainter {
 
       // Hair highlights
       final hairHighlight = Paint()
-        ..color = const Color(0xFFFFFDE7)
+        ..color = const Color(0xFFFFE57F)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5;
       canvas.drawPath(hairPath, hairHighlight);
     }
+
+    // Green hiking bag on back (drawn BEFORE wings and flag)
+    final bagPaint = Paint()
+      ..color = const Color(0xFF2E7D32)
+      ..style = PaintingStyle.fill;
+
+    // Bag main body - bulkier and moved further left
+    final bagBody = Path();
+    bagBody.moveTo(center.dx - radius * 0.75, center.dy - radius * 0.45);
+    bagBody.lineTo(center.dx - radius * 1.15, center.dy - radius * 0.45);
+    bagBody.lineTo(center.dx - radius * 1.15, center.dy + radius * 0.45);
+    bagBody.lineTo(center.dx - radius * 0.75, center.dy + radius * 0.45);
+    bagBody.close();
+    canvas.drawPath(bagBody, bagPaint);
+
+    // Bag outline
+    final bagOutline = Paint()
+      ..color = const Color(0xFF1B5E20)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    canvas.drawPath(bagBody, bagOutline);
+
+    // Top flap
+    final flapPaint = Paint()
+      ..color = const Color(0xFF1B5E20)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(
+        center.dx - radius * 1.15,
+        center.dy - radius * 0.5,
+        radius * 0.4,
+        radius * 0.15,
+      ),
+      flapPaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(
+        center.dx - radius * 1.15,
+        center.dy - radius * 0.5,
+        radius * 0.4,
+        radius * 0.15,
+      ),
+      bagOutline,
+    );
+
+    // Bag straps
+    final strapPaint = Paint()
+      ..color = const Color(0xFF1B5E20)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(center.dx - radius * 1.05, center.dy - radius * 0.35),
+      Offset(center.dx - radius * 0.45, center.dy - radius * 0.5),
+      strapPaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx - radius * 0.85, center.dy - radius * 0.35),
+      Offset(center.dx - radius * 0.35, center.dy - radius * 0.45),
+      strapPaint,
+    );
+
+    // Large front pocket
+    final pocketPaint = Paint()
+      ..color = const Color(0xFF388E3C)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(
+        center.dx - radius * 1.08,
+        center.dy - radius * 0.05,
+        radius * 0.28,
+        radius * 0.35,
+      ),
+      pocketPaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(
+        center.dx - radius * 1.08,
+        center.dy - radius * 0.05,
+        radius * 0.28,
+        radius * 0.35,
+      ),
+      bagOutline,
+    );
+
+    // Side pocket details
+    canvas.drawLine(
+      Offset(center.dx - radius * 0.8, center.dy - radius * 0.2),
+      Offset(center.dx - radius * 0.8, center.dy + radius * 0.2),
+      bagOutline,
+    );
+
+    // Philippine flag pole on back/rear of the bird (drawn BEFORE wings)
+    // Flag pole (black stick) - positioned at the rear
+    final polePaint = Paint()
+      ..color = const Color(0xFF000000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(center.dx - radius * 0.7, center.dy + radius * 0.4),
+      Offset(center.dx - radius * 0.7, center.dy - radius * 0.8),
+      polePaint,
+    );
+
+    // Philippine flag (complete rectangle) - facing LEFT
+    // Blue top stripe (hoist on left, extending left)
+    final flagBluePaint = Paint()
+      ..color = const Color(0xFF0038A8)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(
+        center.dx - radius * 1.3,
+        center.dy - radius * 0.8,
+        radius * 0.6,
+        radius * 0.2,
+      ),
+      flagBluePaint,
+    );
+
+    // Red bottom stripe
+    final flagRedPaint = Paint()
+      ..color = const Color(0xFFCE1126)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(
+        center.dx - radius * 1.3,
+        center.dy - radius * 0.6,
+        radius * 0.6,
+        radius * 0.2,
+      ),
+      flagRedPaint,
+    );
+
+    // White triangle (hoist side)
+    final flagWhitePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    final whiteTriangle = Path();
+    whiteTriangle.moveTo(center.dx - radius * 0.7, center.dy - radius * 0.8);
+    whiteTriangle.lineTo(center.dx - radius * 0.7, center.dy - radius * 0.4);
+    whiteTriangle.lineTo(center.dx - radius * 1.0, center.dy - radius * 0.6);
+    whiteTriangle.close();
+    canvas.drawPath(whiteTriangle, flagWhitePaint);
+
+    // Yellow sun in triangle
+    final sunPaint = Paint()
+      ..color = const Color(0xFFFCD116)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.85, center.dy - radius * 0.6),
+      radius * 0.08,
+      sunPaint,
+    );
+
+    // Sun rays (8 main rays)
+    final rayPaint = Paint()
+      ..color = const Color(0xFFFCD116)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+    for (int i = 0; i < 8; i++) {
+      final angle = (i * math.pi / 4);
+      final startX =
+          center.dx - radius * 0.85 + math.cos(angle) * radius * 0.08;
+      final startY = center.dy - radius * 0.6 + math.sin(angle) * radius * 0.08;
+      final endX = center.dx - radius * 0.85 + math.cos(angle) * radius * 0.14;
+      final endY = center.dy - radius * 0.6 + math.sin(angle) * radius * 0.14;
+      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), rayPaint);
+    }
+
+    // Three stars in triangle
+    final starPaint = Paint()
+      ..color = const Color(0xFFFCD116)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.82, center.dy - radius * 0.52),
+      radius * 0.03,
+      starPaint,
+    );
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.92, center.dy - radius * 0.6),
+      radius * 0.03,
+      starPaint,
+    );
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.82, center.dy - radius * 0.68),
+      radius * 0.03,
+      starPaint,
+    );
+
+    // Flag outline
+    final flagOutline = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    canvas.drawPath(whiteTriangle, flagOutline);
+    canvas.drawRect(
+      Rect.fromLTWH(
+        center.dx - radius * 1.3,
+        center.dy - radius * 0.8,
+        radius * 0.6,
+        radius * 0.4,
+      ),
+      flagOutline,
+    );
 
     // Three feather wings
     final featherPaint = Paint()
@@ -1525,122 +1798,141 @@ class CharacterBirdPainter extends CustomPainter {
     );
     beakPath.close();
     canvas.drawPath(beakPath, beakPaint);
+  }
 
-    // Philippine flag pole on back/rear of the bird
-    // Flag pole (brown stick) - positioned at the rear
-    final polePaint = Paint()
-      ..color = const Color(0xFF654321)
+  // Benedict - White bird with 3 sharp black wings, sharp beak, and glowing black eyes
+  void _drawBenedict(Canvas canvas, Offset center, double radius) {
+    // Pure white body with subtle gradient
+    final bodyGradient = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFFFFFF),
+          const Color(0xFFF5F5F5),
+          const Color(0xFFEEEEEE),
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawCircle(center, radius, bodyGradient);
+
+    // Body outline
+    final bodyOutlinePaint = Paint()
+      ..color = const Color(0xFFE0E0E0)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, radius, bodyOutlinePaint);
+
+    // Three sharp black wings - layered and angular
+    final wingPaint = Paint()
+      ..color = const Color(0xFF000000)
+      ..style = PaintingStyle.fill;
+
+    // First wing (topmost)
+    final wing1Path = Path();
+    wing1Path.moveTo(center.dx - radius * 0.2, center.dy - radius * 0.4);
+    wing1Path.lineTo(center.dx - radius * 1.4, center.dy - radius * 0.1);
+    wing1Path.lineTo(center.dx - radius * 1.3, center.dy + radius * 0.1);
+    wing1Path.lineTo(center.dx - radius * 0.3, center.dy - radius * 0.2);
+    wing1Path.close();
+    canvas.drawPath(wing1Path, wingPaint);
+
+    // Second wing (middle)
+    final wing2Path = Path();
+    wing2Path.moveTo(center.dx - radius * 0.15, center.dy);
+    wing2Path.lineTo(center.dx - radius * 1.5, center.dy + radius * 0.3);
+    wing2Path.lineTo(center.dx - radius * 1.35, center.dy + radius * 0.5);
+    wing2Path.lineTo(center.dx - radius * 0.25, center.dy + radius * 0.2);
+    wing2Path.close();
+    canvas.drawPath(wing2Path, wingPaint);
+
+    // Third wing (bottom)
+    final wing3Path = Path();
+    wing3Path.moveTo(center.dx - radius * 0.2, center.dy + radius * 0.4);
+    wing3Path.lineTo(center.dx - radius * 1.3, center.dy + radius * 0.7);
+    wing3Path.lineTo(center.dx - radius * 1.15, center.dy + radius * 0.9);
+    wing3Path.lineTo(center.dx - radius * 0.3, center.dy + radius * 0.6);
+    wing3Path.close();
+    canvas.drawPath(wing3Path, wingPaint);
+
+    // Wing sharp edges highlight
+    final wingEdgePaint = Paint()
+      ..color = const Color(0xFF1A1A1A)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
-      Offset(center.dx - radius * 0.7, center.dy + radius * 0.4),
-      Offset(center.dx - radius * 0.7, center.dy - radius * 0.8),
-      polePaint,
-    );
+    canvas.drawPath(wing1Path, wingEdgePaint);
+    canvas.drawPath(wing2Path, wingEdgePaint);
+    canvas.drawPath(wing3Path, wingEdgePaint);
 
-    // Philippine flag (simplified) - at the rear
-    // White triangle
-    final flagWhitePaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-    final whiteTriangle = Path();
-    whiteTriangle.moveTo(center.dx - radius * 0.7, center.dy - radius * 0.8);
-    whiteTriangle.lineTo(center.dx, center.dy - radius * 1.0);
-    whiteTriangle.lineTo(center.dx, center.dy - radius * 0.6);
-    whiteTriangle.close();
-    canvas.drawPath(whiteTriangle, flagWhitePaint);
+    // Glowing black eyes - outer glow
+    final outerGlowPaint = Paint()
+      ..color = const Color(0xFF000000).withOpacity(0.6)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+    canvas.drawCircle(
+        Offset(center.dx + radius * 0.3, center.dy - radius * 0.2),
+        radius * 0.45,
+        outerGlowPaint);
 
-    // Blue top stripe
-    final flagBluePaint = Paint()
-      ..color = const Color(0xFF0038A8)
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(
-      Rect.fromLTWH(
-        center.dx,
-        center.dy - radius * 1.0,
-        radius * 0.5,
-        radius * 0.2,
-      ),
-      flagBluePaint,
-    );
+    // Mid glow layer
+    final midGlowPaint = Paint()
+      ..color = const Color(0xFF1A1A1A).withOpacity(0.8)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawCircle(
+        Offset(center.dx + radius * 0.3, center.dy - radius * 0.2),
+        radius * 0.35,
+        midGlowPaint);
 
-    // Red bottom stripe
-    final flagRedPaint = Paint()
-      ..color = const Color(0xFFCE1126)
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(
-      Rect.fromLTWH(
-        center.dx,
-        center.dy - radius * 0.8,
-        radius * 0.5,
-        radius * 0.2,
-      ),
-      flagRedPaint,
-    );
-
-    // Yellow sun in triangle (simplified circle)
-    final sunPaint = Paint()
-      ..color = const Color(0xFFFCD116)
+    // Eye base - dark center
+    final eyeBasePaint = Paint()
+      ..color = const Color(0xFF1A1A1A)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(
-      Offset(center.dx - radius * 0.45, center.dy - radius * 0.8),
-      radius * 0.12,
-      sunPaint,
-    );
+        Offset(center.dx + radius * 0.3, center.dy - radius * 0.2),
+        radius * 0.28,
+        eyeBasePaint);
 
-    // Sun rays (8 main rays simplified)
-    final rayPaint = Paint()
-      ..color = const Color(0xFFFCD116)
+    // Black iris
+    final irisPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF333333), // Dark gray center
+          const Color(0xFF1A1A1A), // Darker gray
+          const Color(0xFF000000), // Black rim
+        ],
+      ).createShader(Rect.fromCircle(
+        center: Offset(center.dx + radius * 0.3, center.dy - radius * 0.2),
+        radius: radius * 0.22,
+      ));
+    canvas.drawCircle(
+        Offset(center.dx + radius * 0.3, center.dy - radius * 0.2),
+        radius * 0.22,
+        irisPaint);
+
+    // Dark pupil
+    final pupilPaint = Paint()
+      ..color = const Color(0xFF000000)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+        Offset(center.dx + radius * 0.3, center.dy - radius * 0.2),
+        radius * 0.08,
+        pupilPaint);
+
+    // Sharp thin black beak
+    final beakPaint = Paint()
+      ..color = const Color(0xFF000000)
+      ..style = PaintingStyle.fill;
+
+    final beakPath = Path();
+    beakPath.moveTo(center.dx + radius * 0.7, center.dy - 2);
+    beakPath.lineTo(center.dx + radius * 1.5, center.dy);
+    beakPath.lineTo(center.dx + radius * 0.7, center.dy + 2);
+    beakPath.close();
+    canvas.drawPath(beakPath, beakPaint);
+
+    // Beak sharp edge
+    final beakEdgePaint = Paint()
+      ..color = const Color(0xFF1A1A1A)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round;
-    for (int i = 0; i < 8; i++) {
-      final angle = (i * math.pi / 4);
-      final startX =
-          center.dx - radius * 0.45 + math.cos(angle) * radius * 0.12;
-      final startY = center.dy - radius * 0.8 + math.sin(angle) * radius * 0.12;
-      final endX = center.dx - radius * 0.45 + math.cos(angle) * radius * 0.2;
-      final endY = center.dy - radius * 0.8 + math.sin(angle) * radius * 0.2;
-      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), rayPaint);
-    }
-
-    // Three stars in triangle (simplified)
-    final starPaint = Paint()
-      ..color = const Color(0xFFFCD116)
-      ..style = PaintingStyle.fill;
-    // Star positions
-    canvas.drawCircle(
-      Offset(center.dx - radius * 0.35, center.dy - radius * 0.95),
-      radius * 0.04,
-      starPaint,
-    );
-    canvas.drawCircle(
-      Offset(center.dx - radius * 0.2, center.dy - radius * 0.75),
-      radius * 0.04,
-      starPaint,
-    );
-    canvas.drawCircle(
-      Offset(center.dx - radius * 0.35, center.dy - radius * 0.65),
-      radius * 0.04,
-      starPaint,
-    );
-
-    // Flag outline
-    final flagOutline = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    canvas.drawPath(whiteTriangle, flagOutline);
-    canvas.drawRect(
-      Rect.fromLTWH(
-        center.dx,
-        center.dy - radius * 1.0,
-        radius * 0.5,
-        radius * 0.4,
-      ),
-      flagOutline,
-    );
+      ..strokeWidth = 1.5;
+    canvas.drawPath(beakPath, beakEdgePaint);
   }
 
   void _drawStandardEye(Canvas canvas, Offset center, double radius) {
