@@ -12,12 +12,14 @@ class GamePainter extends CustomPainter {
   final List<Pipe> pipes;
   final MapData mapData;
   final BirdCustomization? birdCustomization;
+  final bool isImmune;
 
   GamePainter({
     required this.bird,
     required this.pipes,
     required this.mapData,
     this.birdCustomization,
+    this.isImmune = false,
   });
 
   @override
