@@ -140,6 +140,59 @@ class GamePainter extends CustomPainter {
         _drawBenedict(canvas, center, radius);
         break;
     }
+
+    // Draw immunity shield if active
+    if (isImmune) {
+      _drawImmunityShield(canvas, center, radius);
+    }
+  }
+
+  // Draw immunity shield effect
+  void _drawImmunityShield(Canvas canvas, Offset center, double radius) {
+    final shieldRadius = radius * 1.8;
+
+    // Outer glowing shield
+    final outerShieldPaint = Paint()
+      ..color = Colors.cyan.withOpacity(0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+    canvas.drawCircle(center, shieldRadius, outerShieldPaint);
+
+    // Mid shield layer
+    final midShieldPaint = Paint()
+      ..color = Colors.lightBlueAccent.withOpacity(0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+    canvas.drawCircle(center, shieldRadius - 2, midShieldPaint);
+
+    // Inner shield core
+    final innerShieldPaint = Paint()
+      ..color = Colors.white.withOpacity(0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, shieldRadius - 4, innerShieldPaint);
+
+    // Hexagonal shield pattern
+    final hexPath = Path();
+    for (int i = 0; i < 6; i++) {
+      final angle = (i * 60) * (math.pi / 180);
+      final x = center.dx + shieldRadius * 0.9 * math.cos(angle);
+      final y = center.dy + shieldRadius * 0.9 * math.sin(angle);
+      if (i == 0) {
+        hexPath.moveTo(x, y);
+      } else {
+        hexPath.lineTo(x, y);
+      }
+    }
+    hexPath.close();
+
+    final hexPaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawPath(hexPath, hexPaint);
   }
 
   // Default Bird - Classic round bird with custom colors

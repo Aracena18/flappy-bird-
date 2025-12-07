@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'bird.dart';
+
 class BirdCustomization {
   final int birdIndex;
   final int colorIndex;
@@ -59,8 +61,13 @@ class BirdCustomization {
 
   // Get bird character icon
   String get birdIcon {
-    final birds = ['🐦', '🤖', '💪', '🦅', '🦜', '🏋️', '😇', '🇵🇭'];
+    final birds = ['🐦', '🤖', '💪', '🦅', '🦜', '🏋️', '😇', '🇵🇭', '🦅'];
     return birds[birdIndex.clamp(0, birds.length - 1)];
+  }
+
+  // Get bird specifications
+  BirdSpec get birdSpec {
+    return Bird.getBirdSpec(birdIndex);
   }
 
   // Save to shared preferences

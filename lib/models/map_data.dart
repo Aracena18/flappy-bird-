@@ -9,6 +9,7 @@ class MapData {
   final Color backgroundColor;
   final Color pipeColor;
   final String backgroundImage;
+  final double gravityMultiplier; // Planet-specific gravity multiplier
 
   const MapData({
     required this.name,
@@ -19,17 +20,19 @@ class MapData {
     required this.backgroundColor,
     required this.pipeColor,
     required this.backgroundImage,
+    this.gravityMultiplier = 0.35, // Default multiplier
   });
 
   // Convert gravity to pixels per frame² (assuming 60 FPS)
-  // Scaled down for better gameplay while maintaining relative differences
-  double get gravityPixels => gravity * 0.35; // Reduced from 0.6 for more playability
+  // Using planet-specific multiplier for fine-tuned gameplay
+  double get gravityPixels => gravity * gravityMultiplier;
 
   static const Map<String, MapData> maps = {
     'earth': MapData(
       name: 'Earth',
       icon: '🌍',
       gravity: 9.8,
+      gravityMultiplier: 0.20, // Reduced for comfortable Earth bird gameplay
       description: 'Standard gravity on Earth',
       primaryColor: Color(0xFF4CAF50),
       backgroundColor: Color(0xFF87CEEB),
@@ -40,6 +43,7 @@ class MapData {
       name: 'Moon',
       icon: '🌙',
       gravity: 1.6,
+      gravityMultiplier: 0.35, // Default
       description: 'Low gravity - easier to fly!',
       primaryColor: Color(0xFF9E9E9E),
       backgroundColor: Color(0xFF212121),
@@ -50,6 +54,7 @@ class MapData {
       name: 'Mars',
       icon: '🔴',
       gravity: 3.7,
+      gravityMultiplier: 0.35, // Default
       description: 'Red planet - light gravity',
       primaryColor: Color(0xFFD32F2F),
       backgroundColor: Color(0xFFFFCDD2),
@@ -60,6 +65,7 @@ class MapData {
       name: 'Venus',
       icon: '💛',
       gravity: 8.9,
+      gravityMultiplier: 0.30, // Default
       description: 'Similar to Earth gravity',
       primaryColor: Color(0xFFFFC107),
       backgroundColor: Color(0xFFFFF8E1),
@@ -70,6 +76,7 @@ class MapData {
       name: 'Jupiter',
       icon: '🪐',
       gravity: 24.8,
+      gravityMultiplier: 0.15, // Default
       description: 'High gravity - very challenging!',
       primaryColor: Color(0xFFFF9800),
       backgroundColor: Color(0xFFFFE0B2),
@@ -80,6 +87,7 @@ class MapData {
       name: 'Saturn',
       icon: '💫',
       gravity: 10.4,
+      gravityMultiplier: 0.35, // Default
       description: 'Ringed planet - moderate gravity',
       primaryColor: Color(0xFFFFEB3B),
       backgroundColor: Color(0xFFF9C4),
@@ -90,6 +98,7 @@ class MapData {
       name: 'Neptune',
       icon: '🔵',
       gravity: 11.2,
+      gravityMultiplier: 0.35, // Default
       description: 'Ice giant - strong gravity',
       primaryColor: Color(0xFF2196F3),
       backgroundColor: Color(0xFFBBDEFB),
@@ -100,6 +109,7 @@ class MapData {
       name: 'Space',
       icon: '🚀',
       gravity: 0.5,
+      gravityMultiplier: 0.35, // Default
       description: 'Microgravity - float forever!',
       primaryColor: Color(0xFF673AB7),
       backgroundColor: Color(0xFF0D1B2A),
