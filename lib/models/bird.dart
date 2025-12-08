@@ -78,6 +78,18 @@ class Bird {
           size: 42,
           maxVelocity: 12.0,
           optimalPlanet: 'mars'),
+      9: BirdSpec(
+          name: 'Bumblebai',
+          flapStrength: -6.0,
+          size: 44,
+          maxVelocity: 8.5,
+          optimalPlanet: 'moon'),
+      10: BirdSpec(
+          name: 'JM',
+          flapStrength: -17.5,
+          size: 42,
+          maxVelocity: 13.0,
+          optimalPlanet: 'venus'),
     };
     return specs[birdType] ?? specs[0]!;
   }

@@ -61,7 +61,19 @@ class BirdCustomization {
 
   // Get bird character icon
   String get birdIcon {
-    final birds = ['🐦', '🤖', '💪', '🦅', '🦜', '🏋️', '😇', '🇵🇭', '🦅'];
+    final birds = [
+      '🐦',
+      '🤖',
+      '💪',
+      '🦅',
+      '🦜',
+      '🏋️',
+      '😇',
+      '🇵🇭',
+      '🦅',
+      '🚗',
+      '🎤'
+    ];
     return birds[birdIndex.clamp(0, birds.length - 1)];
   }
 

@@ -28,54 +28,88 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
       icon: '🐦',
       description: 'Robert Jhon Aracena',
       isUnlocked: true,
+      strength: 'earth',
+      weakness: 'jupiter',
     ),
     BirdCharacter(
       name: 'Cybird',
       icon: '🤖',
       description: 'Half Robot, Half Langgam',
       isUnlocked: true,
+      strength: 'moon',
+      weakness: 'jupiter',
     ),
     BirdCharacter(
       name: 'Sierra Madre',
       icon: '💪',
       description: 'Luzon Buff',
       isUnlocked: true,
+      strength: 'earth',
+      weakness: 'jupiter',
     ),
     BirdCharacter(
       name: 'Eagle',
       icon: '🦅',
       description: 'Philippine Eagle',
       isUnlocked: true,
+      strength: 'earth',
+      weakness: 'jupiter',
     ),
     BirdCharacter(
       name: 'Hawk',
       icon: '🦜',
       description: 'Cutie Patotie',
       isUnlocked: true,
+      strength: 'earth',
+      weakness: 'jupiter',
     ),
     BirdCharacter(
       name: 'Aaron',
       icon: '💪',
       description: 'Aaron Jalapon',
       isUnlocked: true,
+      strength: 'jupiter',
+      weakness: 'space',
     ),
     BirdCharacter(
       name: 'Lucifer',
       icon: '😇',
       description: 'The Fallen Angel',
       isUnlocked: true,
+      strength: 'saturn',
+      weakness: 'space',
     ),
     BirdCharacter(
       name: 'Philippine Blooper',
       icon: '🇵🇭',
       description: 'Guinness World of Bad Records',
       isUnlocked: true,
+      strength: 'earth',
+      weakness: 'jupiter',
     ),
     BirdCharacter(
       name: 'Benedict',
       icon: '🦅',
       description: 'John Benedict Bongcac',
       isUnlocked: true,
+      strength: 'mars',
+      weakness: 'space, moon',
+    ),
+    BirdCharacter(
+      name: 'Bumblebai',
+      icon: '🚗',
+      description: 'Autobai Bisaya',
+      isUnlocked: true,
+      strength: 'moon',
+      weakness: 'jupiter',
+    ),
+    BirdCharacter(
+      name: 'JM',
+      icon: '🎤',
+      description: 'John Mhel Dalumpines',
+      isUnlocked: true,
+      strength: 'venus',
+      weakness: 'jupiter',
     ),
   ];
 
@@ -221,6 +255,104 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
                           color: Colors.white,
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Bird Stats: Strength and Weakness
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Strength
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.green,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'STRENGTH',
+                                    style: GoogleFonts.fredoka(
+                                      fontSize: 9,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  Text(
+                                    _birdCharacters[_selectedBirdIndex]
+                                        .strength
+                                        .toUpperCase(),
+                                    style: GoogleFonts.fredoka(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Weakness
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.red,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.close,
+                                color: Colors.red,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'WEAKNESS',
+                                    style: GoogleFonts.fredoka(
+                                      fontSize: 9,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  Text(
+                                    _birdCharacters[_selectedBirdIndex]
+                                        .weakness
+                                        .toUpperCase(),
+                                    style: GoogleFonts.fredoka(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -471,12 +603,16 @@ class BirdCharacter {
   final String icon;
   final String description;
   final bool isUnlocked;
+  final String strength;
+  final String weakness;
 
   BirdCharacter({
     required this.name,
     required this.icon,
     required this.description,
     required this.isUnlocked,
+    required this.strength,
+    required this.weakness,
   });
 }
 
@@ -546,6 +682,12 @@ class CharacterBirdPainter extends CustomPainter {
         break;
       case 8:
         _drawBenedict(canvas, center, radius);
+        break;
+      case 9:
+        _drawBumblebee(canvas, center, radius);
+        break;
+      case 10:
+        _drawJM(canvas, center, radius);
         break;
     }
   }
@@ -1981,6 +2123,524 @@ class CharacterBirdPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     canvas.drawPath(beakPath, beakOutline);
+  }
+
+  // Bumblebee - Transformer autobot with car door wings and blue glowing eyes
+  void _drawBumblebee(Canvas canvas, Offset center, double radius) {
+    // Yellow and black striped body (Bumblebee colors)
+    final bodyGradient = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFFEB3B), // Bright yellow
+          const Color(0xFFFFC107), // Deep yellow
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawCircle(center, radius, bodyGradient);
+
+    // Black racing stripes
+    final stripePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.fill;
+
+    // Left stripe
+    final leftStripe = Path();
+    leftStripe.moveTo(center.dx - radius * 0.3, center.dy - radius);
+    leftStripe.lineTo(center.dx - radius * 0.1, center.dy - radius);
+    leftStripe.lineTo(center.dx - radius * 0.1, center.dy + radius);
+    leftStripe.lineTo(center.dx - radius * 0.3, center.dy + radius);
+    leftStripe.close();
+    canvas.drawPath(leftStripe, stripePaint);
+
+    // Right stripe
+    final rightStripe = Path();
+    rightStripe.moveTo(center.dx + radius * 0.1, center.dy - radius);
+    rightStripe.lineTo(center.dx + radius * 0.3, center.dy - radius);
+    rightStripe.lineTo(center.dx + radius * 0.3, center.dy + radius);
+    rightStripe.lineTo(center.dx + radius * 0.1, center.dy + radius);
+    rightStripe.close();
+    canvas.drawPath(rightStripe, stripePaint);
+
+    // Autobot insignia on chest (simplified)
+    final insigniaPaint = Paint()
+      ..color = const Color(0xFFD32F2F)
+      ..style = PaintingStyle.fill;
+
+    final insigniaPath = Path();
+    insigniaPath.moveTo(center.dx, center.dy - radius * 0.2);
+    insigniaPath.lineTo(center.dx - radius * 0.15, center.dy + radius * 0.1);
+    insigniaPath.lineTo(center.dx, center.dy);
+    insigniaPath.lineTo(center.dx + radius * 0.15, center.dy + radius * 0.1);
+    insigniaPath.close();
+    canvas.drawPath(insigniaPath, insigniaPaint);
+
+    // Car door wings - large and angular
+    final doorPaint = Paint()
+      ..color = const Color(0xFFFFC107) // Yellow door
+      ..style = PaintingStyle.fill;
+
+    // Left car door wing
+    final leftDoor = Path();
+    leftDoor.moveTo(center.dx - radius * 0.2, center.dy - radius * 0.3);
+    leftDoor.lineTo(center.dx - radius * 1.4, center.dy - radius * 0.2);
+    leftDoor.lineTo(center.dx - radius * 1.5, center.dy + radius * 0.6);
+    leftDoor.lineTo(center.dx - radius * 0.3, center.dy + radius * 0.7);
+    leftDoor.close();
+    canvas.drawPath(leftDoor, doorPaint);
+
+    // Door window - black glass
+    final windowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.8)
+      ..style = PaintingStyle.fill;
+
+    final window = Path();
+    window.moveTo(center.dx - radius * 0.4, center.dy - radius * 0.2);
+    window.lineTo(center.dx - radius * 1.2, center.dy - radius * 0.1);
+    window.lineTo(center.dx - radius * 1.25, center.dy + radius * 0.3);
+    window.lineTo(center.dx - radius * 0.45, center.dy + radius * 0.35);
+    window.close();
+    canvas.drawPath(window, windowPaint);
+
+    // Door handle
+    final handlePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(center.dx - radius * 0.9, center.dy + radius * 0.1,
+          radius * 0.15, radius * 0.08),
+      handlePaint,
+    );
+
+    // Wing outline
+    final doorOutline = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    canvas.drawPath(leftDoor, doorOutline);
+
+    // Mechanical joints/hinges
+    final jointPaint = Paint()
+      ..color = const Color(0xFF212121)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+        Offset(center.dx - radius * 0.2, center.dy - radius * 0.3),
+        radius * 0.12,
+        jointPaint);
+    canvas.drawCircle(
+        Offset(center.dx - radius * 0.3, center.dy + radius * 0.7),
+        radius * 0.12,
+        jointPaint);
+
+    // Blue glowing eyes (like Cybird)
+    // Outer glow
+    final eyeGlowPaint = Paint()
+      ..color = const Color(0xFF2196F3).withOpacity(0.6)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.4, center.dy - radius * 0.15),
+      radius * 0.25,
+      eyeGlowPaint,
+    );
+
+    // Mid glow
+    final midGlowPaint = Paint()
+      ..color = const Color(0xFF64B5F6).withOpacity(0.8)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.4, center.dy - radius * 0.15),
+      radius * 0.18,
+      midGlowPaint,
+    );
+
+    // Eye base
+    final eyeBasePaint = Paint()
+      ..color = const Color(0xFF1976D2)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.4, center.dy - radius * 0.15),
+      radius * 0.15,
+      eyeBasePaint,
+    );
+
+    // Bright core
+    final corePaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFBBDEFB),
+          const Color(0xFF2196F3),
+        ],
+      ).createShader(Rect.fromCircle(
+        center: Offset(center.dx + radius * 0.4, center.dy - radius * 0.15),
+        radius: radius * 0.12,
+      ));
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.4, center.dy - radius * 0.15),
+      radius * 0.12,
+      corePaint,
+    );
+
+    // Helmet/head crest (Bumblebee's distinctive look)
+    final crestPaint = Paint()
+      ..color = const Color(0xFFFFC107)
+      ..style = PaintingStyle.fill;
+
+    final crest = Path();
+    crest.moveTo(center.dx - radius * 0.3, center.dy - radius * 0.9);
+    crest.lineTo(center.dx - radius * 0.1, center.dy - radius * 1.1);
+    crest.lineTo(center.dx + radius * 0.1, center.dy - radius * 1.1);
+    crest.lineTo(center.dx + radius * 0.3, center.dy - radius * 0.9);
+    crest.lineTo(center.dx, center.dy - radius * 0.7);
+    crest.close();
+    canvas.drawPath(crest, crestPaint);
+
+    final crestOutline = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawPath(crest, crestOutline);
+
+    // Antenna
+    final antennaPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(center.dx - radius * 0.2, center.dy - radius * 1.1),
+      Offset(center.dx - radius * 0.25, center.dy - radius * 1.3),
+      antennaPaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx + radius * 0.2, center.dy - radius * 1.1),
+      Offset(center.dx + radius * 0.25, center.dy - radius * 1.3),
+      antennaPaint,
+    );
+
+    // Antenna tips
+    final antennaTipPaint = Paint()
+      ..color = const Color(0xFF2196F3)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.25, center.dy - radius * 1.3),
+      radius * 0.08,
+      antennaTipPaint,
+    );
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.25, center.dy - radius * 1.3),
+      radius * 0.08,
+      antennaTipPaint,
+    );
+
+    // Mouthplate (Transformer face mask)
+    final mouthplatePaint = Paint()
+      ..color = const Color(0xFF616161)
+      ..style = PaintingStyle.fill;
+
+    final mouthplate = Path();
+    mouthplate.moveTo(center.dx + radius * 0.5, center.dy + radius * 0.1);
+    mouthplate.lineTo(center.dx + radius * 0.8, center.dy + radius * 0.2);
+    mouthplate.lineTo(center.dx + radius * 0.7, center.dy + radius * 0.4);
+    mouthplate.lineTo(center.dx + radius * 0.5, center.dy + radius * 0.35);
+    mouthplate.close();
+    canvas.drawPath(mouthplate, mouthplatePaint);
+
+    final mouthOutline = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    canvas.drawPath(mouthplate, mouthOutline);
+  }
+
+  void _drawJM(Canvas canvas, Offset center, double radius) {
+    // Korean K-pop inspired bird with vibrant colors and modern style
+
+    // Body - gradient from hot pink to purple (K-pop vibrant colors)
+    final bodyPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFF1493), // Deep pink
+          const Color(0xFFFF69B4), // Hot pink
+          const Color(0xFF9C27B0), // Purple accent
+        ],
+        stops: const [0.0, 0.6, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawCircle(center, radius, bodyPaint);
+
+    // Stylish K-pop hair - swept side bang with highlights
+    final hairPaint = Paint()
+      ..color = const Color(0xFF6A1B9A) // Deep purple hair
+      ..style = PaintingStyle.fill;
+
+    // Main hair volume
+    final hairPath = Path();
+    hairPath.moveTo(center.dx - radius * 0.8, center.dy - radius * 0.3);
+    hairPath.quadraticBezierTo(
+      center.dx - radius * 0.9,
+      center.dy - radius * 1.0,
+      center.dx - radius * 0.3,
+      center.dy - radius * 1.1,
+    );
+    hairPath.quadraticBezierTo(
+      center.dx + radius * 0.2,
+      center.dy - radius * 1.2,
+      center.dx + radius * 0.5,
+      center.dy - radius * 0.9,
+    );
+    hairPath.quadraticBezierTo(
+      center.dx + radius * 0.6,
+      center.dy - radius * 0.5,
+      center.dx + radius * 0.4,
+      center.dy - radius * 0.2,
+    );
+    hairPath.close();
+    canvas.drawPath(hairPath, hairPaint);
+
+    // Hair highlights (blonde streaks - common in K-pop)
+    final highlightPaint = Paint()
+      ..color = const Color(0xFFFFD700) // Gold highlights
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+
+    for (int i = 0; i < 5; i++) {
+      final highlightPath = Path();
+      final startX = center.dx - radius * 0.6 + i * radius * 0.25;
+      final startY = center.dy - radius * 0.9;
+      highlightPath.moveTo(startX, startY);
+      highlightPath.quadraticBezierTo(
+        startX + radius * 0.1,
+        startY + radius * 0.3,
+        startX + radius * 0.05,
+        startY + radius * 0.5,
+      );
+      canvas.drawPath(highlightPath, highlightPaint);
+    }
+
+    // Korean headband accessory with pattern
+    final headbandPaint = Paint()
+      ..color = const Color(0xFF00BCD4) // Cyan headband
+      ..style = PaintingStyle.fill;
+
+    final headbandPath = Path();
+    headbandPath.addOval(Rect.fromCenter(
+      center: Offset(center.dx, center.dy - radius * 0.4),
+      width: radius * 1.8,
+      height: radius * 0.35,
+    ));
+    canvas.drawPath(headbandPath, headbandPaint);
+
+    // Headband embroidery pattern
+    final patternPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    for (int i = -3; i <= 3; i++) {
+      canvas.drawCircle(
+        Offset(center.dx + i * radius * 0.25, center.dy - radius * 0.4),
+        2.0,
+        patternPaint,
+      );
+    }
+
+    // Modern fashion - collar/jacket detail
+    final collarPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final collarPath = Path();
+    collarPath.moveTo(center.dx - radius * 0.4, center.dy + radius * 0.3);
+    collarPath.lineTo(center.dx - radius * 0.5, center.dy + radius * 0.6);
+    collarPath.lineTo(center.dx - radius * 0.2, center.dy + radius * 0.5);
+    collarPath.close();
+    canvas.drawPath(collarPath, collarPaint);
+
+    collarPath.reset();
+    collarPath.moveTo(center.dx + radius * 0.4, center.dy + radius * 0.3);
+    collarPath.lineTo(center.dx + radius * 0.5, center.dy + radius * 0.6);
+    collarPath.lineTo(center.dx + radius * 0.2, center.dy + radius * 0.5);
+    collarPath.close();
+    canvas.drawPath(collarPath, collarPaint);
+
+    // Stylish wing with gradient
+    final wingPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFFF1493),
+          const Color(0xFF00BCD4),
+        ],
+      ).createShader(Rect.fromLTWH(
+        center.dx + radius * 0.3,
+        center.dy - radius * 0.2,
+        radius * 0.8,
+        radius * 0.6,
+      ));
+
+    final wingPath = Path();
+    wingPath.moveTo(center.dx + radius * 0.3, center.dy);
+    wingPath.quadraticBezierTo(
+      center.dx + radius * 0.7,
+      center.dy - radius * 0.3,
+      center.dx + radius * 1.0,
+      center.dy - radius * 0.1,
+    );
+    wingPath.quadraticBezierTo(
+      center.dx + radius * 0.9,
+      center.dy + radius * 0.2,
+      center.dx + radius * 0.4,
+      center.dy + radius * 0.2,
+    );
+    wingPath.close();
+    canvas.drawPath(wingPath, wingPaint);
+
+    // Wing details - feather lines
+    final featherPaint = Paint()
+      ..color = Colors.white.withOpacity(0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    for (int i = 0; i < 4; i++) {
+      canvas.drawLine(
+        Offset(center.dx + radius * 0.5,
+            center.dy - radius * 0.1 + i * radius * 0.1),
+        Offset(center.dx + radius * 0.85,
+            center.dy - radius * 0.05 + i * radius * 0.08),
+        featherPaint,
+      );
+    }
+
+    // Stylish eyes - K-pop eye makeup look
+    final eyeWhitePaint = Paint()..color = Colors.white;
+
+    // Left eye
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(center.dx - radius * 0.25, center.dy - radius * 0.1),
+        width: radius * 0.4,
+        height: radius * 0.35,
+      ),
+      eyeWhitePaint,
+    );
+
+    // Right eye
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(center.dx + radius * 0.25, center.dy - radius * 0.1),
+        width: radius * 0.4,
+        height: radius * 0.35,
+      ),
+      eyeWhitePaint,
+    );
+
+    // Eye makeup - eyeliner effect
+    final eyelinerPaint = Paint()
+      ..color = const Color(0xFF9C27B0) // Purple eyeliner
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    // Left eye liner
+    final leftLiner = Path();
+    leftLiner.moveTo(center.dx - radius * 0.45, center.dy - radius * 0.15);
+    leftLiner.quadraticBezierTo(
+      center.dx - radius * 0.25,
+      center.dy - radius * 0.2,
+      center.dx - radius * 0.05,
+      center.dy - radius * 0.15,
+    );
+    canvas.drawPath(leftLiner, eyelinerPaint);
+
+    // Right eye liner
+    final rightLiner = Path();
+    rightLiner.moveTo(center.dx + radius * 0.05, center.dy - radius * 0.15);
+    rightLiner.quadraticBezierTo(
+      center.dx + radius * 0.25,
+      center.dy - radius * 0.2,
+      center.dx + radius * 0.45,
+      center.dy - radius * 0.15,
+    );
+    canvas.drawPath(rightLiner, eyelinerPaint);
+
+    // Pupils - sparkly effect
+    final pupilPaint = Paint()..color = const Color(0xFF1A237E); // Deep blue
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.25, center.dy - radius * 0.1),
+      radius * 0.12,
+      pupilPaint,
+    );
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.25, center.dy - radius * 0.1),
+      radius * 0.12,
+      pupilPaint,
+    );
+
+    // Eye sparkles
+    final sparklePaint = Paint()..color = Colors.white;
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.22, center.dy - radius * 0.13),
+      radius * 0.04,
+      sparklePaint,
+    );
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.28, center.dy - radius * 0.13),
+      radius * 0.04,
+      sparklePaint,
+    );
+
+    // Cute smile - K-pop style
+    final smilePaint = Paint()
+      ..color = const Color(0xFFFF1493) // Pink smile
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    final smilePath = Path();
+    smilePath.moveTo(center.dx - radius * 0.2, center.dy + radius * 0.15);
+    smilePath.quadraticBezierTo(
+      center.dx,
+      center.dy + radius * 0.25,
+      center.dx + radius * 0.2,
+      center.dy + radius * 0.15,
+    );
+    canvas.drawPath(smilePath, smilePaint);
+
+    // Beak with gradient - modern style
+    final beakPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFFFC107), // Amber
+          const Color(0xFFFF6F00), // Deep orange
+        ],
+      ).createShader(Rect.fromCenter(
+        center: Offset(center.dx, center.dy + radius * 0.05),
+        width: radius * 0.3,
+        height: radius * 0.25,
+      ));
+
+    final beakPath = Path();
+    beakPath.moveTo(center.dx - radius * 0.08, center.dy + radius * 0.02);
+    beakPath.lineTo(center.dx + radius * 0.08, center.dy + radius * 0.02);
+    beakPath.lineTo(center.dx, center.dy + radius * 0.15);
+    beakPath.close();
+    canvas.drawPath(beakPath, beakPaint);
+
+    // Accessory - small earring/piercing
+    final earringPaint = Paint()..color = const Color(0xFFFFD700); // Gold
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.7, center.dy),
+      radius * 0.08,
+      earringPaint,
+    );
+
+    final earringInner = Paint()..color = const Color(0xFF00BCD4); // Cyan gem
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.7, center.dy),
+      radius * 0.04,
+      earringInner,
+    );
+
+    // Outline
+    final outlinePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawCircle(center, radius, outlinePaint);
   }
 
   @override

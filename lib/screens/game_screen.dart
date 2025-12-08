@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -385,22 +386,58 @@ class _GameScreenState extends State<GameScreen> {
                   const imageAspectRatio = 1536 / 672; // 2.286:1
                   final imageWidth = constraints.maxHeight * imageAspectRatio;
 
+                  // Create seamless loop with blended edges
+                  final normalizedOffset = backgroundOffset % imageWidth;
+                  const blendWidth = 100.0; // Width of blend zone
+
                   return ClipRect(
                     child: Stack(
-                      children: List.generate(3, (index) {
-                        // Create 3 background images for seamless horizontal scrolling
-                        return Positioned(
-                          left: (index * imageWidth) - backgroundOffset,
-                          top: 0,
-                          child: Image.asset(
-                            widget.mapData.backgroundImage,
-                            width: imageWidth,
+                      children: [
+                        // Main repeating images
+                        ...List.generate(3, (index) {
+                          return Positioned(
+                            left: (index * imageWidth) - normalizedOffset,
+                            top: 0,
+                            child: Image.asset(
+                              widget.mapData.backgroundImage,
+                              width: imageWidth,
+                              height: constraints.maxHeight,
+                              fit: BoxFit.fitHeight,
+                            ),
+                          );
+                        }),
+                        // Blend zones to hide seams
+                        ...List.generate(3, (index) {
+                          final leftEdge =
+                              (index * imageWidth) - normalizedOffset;
+                          return Positioned(
+                            left: leftEdge - blendWidth / 2,
+                            top: 0,
+                            width: blendWidth,
                             height: constraints.maxHeight,
-                            fit: BoxFit
-                                .fitHeight, // Fits height, shows full width
-                          ),
-                        );
-                      }),
+                            child: ClipRect(
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                      colors: [
+                                        widget.mapData.backgroundColor
+                                            .withOpacity(0.3),
+                                        Colors.transparent,
+                                        widget.mapData.backgroundColor
+                                            .withOpacity(0.3),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
                     ),
                   );
                 },
