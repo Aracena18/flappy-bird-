@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -52,12 +53,12 @@ class _GameScreenState extends State<GameScreen> {
   double backgroundOffset = 0; // For scrolling background
   BirdCustomization? _birdCustomization;
   bool hasUsedRevival = false; // Track if player already used quiz revival
-  
+
   // Immunity system for revival
   bool isImmune = false;
   Timer? immunityTimer;
   int immunityDurationSeconds = 5;
-  
+
   // Physics fun fact for display
   PhysicsFact? _currentFunFact;
 
@@ -75,6 +76,14 @@ class _GameScreenState extends State<GameScreen> {
     final customization = await BirdCustomization.load();
     setState(() {
       _birdCustomization = customization;
+      // Reinitialize bird if game was already initialized with wrong type
+      if (_initialized) {
+        bird = Bird.withType(
+          x: 100,
+          y: MediaQuery.of(context).size.height / 2,
+          birdType: _birdCustomization?.birdIndex ?? 0,
+        );
+      }
     });
   }
 
@@ -97,9 +106,10 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _initGame() {
-    bird = Bird(
+    bird = Bird.withType(
       x: 100,
       y: MediaQuery.of(context).size.height / 2,
+      birdType: _birdCustomization?.birdIndex ?? 0,
     );
     pipes.clear();
     score = 0;
@@ -172,7 +182,8 @@ class _GameScreenState extends State<GameScreen> {
       }
 
       // Check if bird is out of bounds (skip if immune)
-      if (!isImmune && (bird.y < 0 || bird.y > MediaQuery.of(context).size.height)) {
+      if (!isImmune &&
+          (bird.y < 0 || bird.y > MediaQuery.of(context).size.height)) {
         _gameOver();
       }
     });
@@ -321,7 +332,7 @@ class _GameScreenState extends State<GameScreen> {
       gameState = GameState.playing;
       // Reset bird position and velocity
       bird.reset(MediaQuery.of(context).size.height);
-      
+
       // Activate immunity for 5 seconds
       isImmune = true;
     });
@@ -330,7 +341,7 @@ class _GameScreenState extends State<GameScreen> {
     immunityTimer?.cancel();
     immunityTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       final elapsedSeconds = timer.tick * 0.1;
-      
+
       if (elapsedSeconds >= immunityDurationSeconds) {
         timer.cancel();
         setState(() {
@@ -375,22 +386,58 @@ class _GameScreenState extends State<GameScreen> {
                   const imageAspectRatio = 1536 / 672; // 2.286:1
                   final imageWidth = constraints.maxHeight * imageAspectRatio;
 
+                  // Create seamless loop with blended edges
+                  final normalizedOffset = backgroundOffset % imageWidth;
+                  const blendWidth = 100.0; // Width of blend zone
+
                   return ClipRect(
                     child: Stack(
-                      children: List.generate(3, (index) {
-                        // Create 3 background images for seamless horizontal scrolling
-                        return Positioned(
-                          left: (index * imageWidth) - backgroundOffset,
-                          top: 0,
-                          child: Image.asset(
-                            widget.mapData.backgroundImage,
-                            width: imageWidth,
+                      children: [
+                        // Main repeating images
+                        ...List.generate(3, (index) {
+                          return Positioned(
+                            left: (index * imageWidth) - normalizedOffset,
+                            top: 0,
+                            child: Image.asset(
+                              widget.mapData.backgroundImage,
+                              width: imageWidth,
+                              height: constraints.maxHeight,
+                              fit: BoxFit.fitHeight,
+                            ),
+                          );
+                        }),
+                        // Blend zones to hide seams
+                        ...List.generate(3, (index) {
+                          final leftEdge =
+                              (index * imageWidth) - normalizedOffset;
+                          return Positioned(
+                            left: leftEdge - blendWidth / 2,
+                            top: 0,
+                            width: blendWidth,
                             height: constraints.maxHeight,
-                            fit: BoxFit
-                                .fitHeight, // Fits height, shows full width
-                          ),
-                        );
-                      }),
+                            child: ClipRect(
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                      colors: [
+                                        widget.mapData.backgroundColor
+                                            .withOpacity(0.3),
+                                        Colors.transparent,
+                                        widget.mapData.backgroundColor
+                                            .withOpacity(0.3),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
                     ),
                   );
                 },
@@ -922,15 +969,15 @@ class _GameScreenState extends State<GameScreen> {
                                 ),
                                 const SizedBox(height: 12),
                                 ...newAchievements.map((achievement) => Padding(
-                                      padding:
-                                          const EdgeInsets.symmetric(vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 4),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(achievement.icon,
-                                              style:
-                                                  const TextStyle(fontSize: 24)),
+                                              style: const TextStyle(
+                                                  fontSize: 24)),
                                           const SizedBox(width: 10),
                                           Text(
                                             achievement.title,
@@ -974,7 +1021,7 @@ class _GameScreenState extends State<GameScreen> {
                                 Navigator.pop(context);
                               },
                               icon: const Icon(Icons.map),
-                              label: const Text('Change Map'),
+                              label: const Text('Main menu'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white24,
                                 foregroundColor: Colors.white,
