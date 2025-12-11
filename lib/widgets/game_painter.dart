@@ -139,7 +139,66 @@ class GamePainter extends CustomPainter {
       case 8:
         _drawBenedict(canvas, center, radius);
         break;
+      case 9:
+        _drawBumblebee(canvas, center, radius);
+        break;
+      case 10:
+        _drawJM(canvas, center, radius);
+        break;
     }
+
+    // Draw immunity shield if active
+    if (isImmune) {
+      _drawImmunityShield(canvas, center, radius);
+    }
+  }
+
+  // Draw immunity shield effect
+  void _drawImmunityShield(Canvas canvas, Offset center, double radius) {
+    final shieldRadius = radius * 1.8;
+
+    // Outer glowing shield
+    final outerShieldPaint = Paint()
+      ..color = Colors.cyan.withOpacity(0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+    canvas.drawCircle(center, shieldRadius, outerShieldPaint);
+
+    // Mid shield layer
+    final midShieldPaint = Paint()
+      ..color = Colors.lightBlueAccent.withOpacity(0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+    canvas.drawCircle(center, shieldRadius - 2, midShieldPaint);
+
+    // Inner shield core
+    final innerShieldPaint = Paint()
+      ..color = Colors.white.withOpacity(0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, shieldRadius - 4, innerShieldPaint);
+
+    // Hexagonal shield pattern
+    final hexPath = Path();
+    for (int i = 0; i < 6; i++) {
+      final angle = (i * 60) * (math.pi / 180);
+      final x = center.dx + shieldRadius * 0.9 * math.cos(angle);
+      final y = center.dy + shieldRadius * 0.9 * math.sin(angle);
+      if (i == 0) {
+        hexPath.moveTo(x, y);
+      } else {
+        hexPath.lineTo(x, y);
+      }
+    }
+    hexPath.close();
+
+    final hexPaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawPath(hexPath, hexPaint);
   }
 
   // Default Bird - Classic round bird with custom colors
@@ -348,35 +407,6 @@ class GamePainter extends CustomPainter {
       );
 
       canvas.drawPath(vinePath, vineHairPaint);
-    }
-
-    // Small leaves on vines with slight animation
-    final leafPaint = Paint()
-      ..color = const Color(0xFF43A047)
-      ..style = PaintingStyle.fill;
-
-    for (int i = 0; i < 9; i++) {
-      final leafX =
-          center.dx - radius * 0.5 + (i - 4) * radius * 0.15 + hairSway * 0.5;
-      final leafY = center.dy - radius * 0.1 + i * radius * 0.3;
-
-      final leafPath = Path();
-      leafPath.moveTo(leafX, leafY);
-      leafPath.quadraticBezierTo(
-        leafX + radius * 0.08,
-        leafY - radius * 0.05,
-        leafX + radius * 0.06,
-        leafY - radius * 0.1,
-      );
-      leafPath.lineTo(leafX, leafY - radius * 0.05);
-      leafPath.quadraticBezierTo(
-        leafX - radius * 0.08,
-        leafY - radius * 0.05,
-        leafX - radius * 0.06,
-        leafY - radius * 0.1,
-      );
-      leafPath.close();
-      canvas.drawPath(leafPath, leafPaint);
     }
 
     // Strong wing
@@ -1724,8 +1754,581 @@ class GamePainter extends CustomPainter {
     canvas.drawPath(beakPath, beakOutline);
   }
 
+  // Bumblebee - Transformer autobot with animated car door wings
+  void _drawBumblebee(Canvas canvas, Offset center, double radius) {
+    // Wing animation based on velocity
+    final wingAngle = (bird.velocity / 15) * math.pi / 4;
+    final doorSwing = math.sin(wingAngle) * 12;
+
+    // Yellow and black striped body
+    final bodyGradient = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFFEB3B),
+          const Color(0xFFFFC107),
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawCircle(center, radius, bodyGradient);
+
+    // Black racing stripes
+    final stripePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.fill;
+
+    final leftStripe = Path();
+    leftStripe.moveTo(center.dx - radius * 0.3, center.dy - radius);
+    leftStripe.lineTo(center.dx - radius * 0.1, center.dy - radius);
+    leftStripe.lineTo(center.dx - radius * 0.1, center.dy + radius);
+    leftStripe.lineTo(center.dx - radius * 0.3, center.dy + radius);
+    leftStripe.close();
+    canvas.drawPath(leftStripe, stripePaint);
+
+    final rightStripe = Path();
+    rightStripe.moveTo(center.dx + radius * 0.1, center.dy - radius);
+    rightStripe.lineTo(center.dx + radius * 0.3, center.dy - radius);
+    rightStripe.lineTo(center.dx + radius * 0.3, center.dy + radius);
+    rightStripe.lineTo(center.dx + radius * 0.1, center.dy + radius);
+    rightStripe.close();
+    canvas.drawPath(rightStripe, stripePaint);
+
+    // Autobot insignia
+    final insigniaPaint = Paint()
+      ..color = const Color(0xFFD32F2F)
+      ..style = PaintingStyle.fill;
+
+    final insigniaPath = Path();
+    insigniaPath.moveTo(center.dx, center.dy - radius * 0.2);
+    insigniaPath.lineTo(center.dx - radius * 0.15, center.dy + radius * 0.1);
+    insigniaPath.lineTo(center.dx, center.dy);
+    insigniaPath.lineTo(center.dx + radius * 0.15, center.dy + radius * 0.1);
+    insigniaPath.close();
+    canvas.drawPath(insigniaPath, insigniaPaint);
+
+    // Animated car door wing - opens/closes with velocity
+    final doorPaint = Paint()
+      ..color = const Color(0xFFFFC107) // Yellow door
+      ..style = PaintingStyle.fill;
+
+    canvas.save();
+    // Rotate around hinge point for door swing animation
+    canvas.translate(center.dx - radius * 0.2, center.dy);
+    canvas.rotate(doorSwing * 0.05);
+    canvas.translate(-(center.dx - radius * 0.2), -center.dy);
+
+    final leftDoor = Path();
+    leftDoor.moveTo(center.dx - radius * 0.2, center.dy - radius * 0.4);
+    leftDoor.lineTo(center.dx - radius * 1.6, center.dy - radius * 0.3);
+    leftDoor.lineTo(center.dx - radius * 1.7, center.dy + radius * 0.8);
+    leftDoor.lineTo(center.dx - radius * 0.3, center.dy + radius * 0.8);
+    leftDoor.close();
+    canvas.drawPath(leftDoor, doorPaint);
+
+    // Door window with black glass
+    final windowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.8)
+      ..style = PaintingStyle.fill;
+
+    final window = Path();
+    window.moveTo(center.dx - radius * 0.4, center.dy - radius * 0.25);
+    window.lineTo(center.dx - radius * 1.4, center.dy - radius * 0.15);
+    window.lineTo(center.dx - radius * 1.45, center.dy + radius * 0.4);
+    window.lineTo(center.dx - radius * 0.45, center.dy + radius * 0.45);
+    window.close();
+    canvas.drawPath(window, windowPaint);
+
+    // Door handle
+    final handlePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(center.dx - radius * 1.05, center.dy + radius * 0.15,
+          radius * 0.2, radius * 0.1),
+      handlePaint,
+    );
+
+    // Wing outline
+    final doorOutline = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    canvas.drawPath(leftDoor, doorOutline);
+
+    // Mechanical hinges
+    final jointPaint = Paint()
+      ..color = const Color(0xFF212121)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+        Offset(center.dx - radius * 0.2, center.dy - radius * 0.4),
+        radius * 0.15,
+        jointPaint);
+    canvas.drawCircle(
+        Offset(center.dx - radius * 0.3, center.dy + radius * 0.8),
+        radius * 0.15,
+        jointPaint);
+
+    // Hinge detail
+    final hingeOutline = Paint()
+      ..color = const Color(0xFF616161)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(
+        Offset(center.dx - radius * 0.2, center.dy - radius * 0.4),
+        radius * 0.15,
+        hingeOutline);
+
+    canvas.restore();
+
+    // Blue glowing eyes (like Cybird but brighter)
+    // Outer glow
+    final eyeGlowPaint = Paint()
+      ..color = const Color(0xFF2196F3).withOpacity(0.7)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.45, center.dy - radius * 0.2),
+      radius * 0.3,
+      eyeGlowPaint,
+    );
+
+    // Mid glow
+    final midGlowPaint = Paint()
+      ..color = const Color(0xFF64B5F6).withOpacity(0.9)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.45, center.dy - radius * 0.2),
+      radius * 0.22,
+      midGlowPaint,
+    );
+
+    // Eye base
+    final eyeBasePaint = Paint()
+      ..color = const Color(0xFF1976D2)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.45, center.dy - radius * 0.2),
+      radius * 0.18,
+      eyeBasePaint,
+    );
+
+    // Bright core
+    final corePaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFE3F2FD),
+          const Color(0xFF2196F3),
+        ],
+      ).createShader(Rect.fromCircle(
+        center: Offset(center.dx + radius * 0.45, center.dy - radius * 0.2),
+        radius: radius * 0.15,
+      ));
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.45, center.dy - radius * 0.2),
+      radius * 0.15,
+      corePaint,
+    );
+
+    // Helmet crest
+    final crestPaint = Paint()
+      ..color = const Color(0xFFFFC107)
+      ..style = PaintingStyle.fill;
+
+    final crest = Path();
+    crest.moveTo(center.dx - radius * 0.35, center.dy - radius * 1.0);
+    crest.lineTo(center.dx - radius * 0.12, center.dy - radius * 1.25);
+    crest.lineTo(center.dx + radius * 0.12, center.dy - radius * 1.25);
+    crest.lineTo(center.dx + radius * 0.35, center.dy - radius * 1.0);
+    crest.lineTo(center.dx, center.dy - radius * 0.75);
+    crest.close();
+    canvas.drawPath(crest, crestPaint);
+
+    final crestOutline = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    canvas.drawPath(crest, crestOutline);
+
+    // Animated antennae
+    final antennaAngle = wingAngle * 0.3;
+    final antennaPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    // Left antenna
+    canvas.drawLine(
+      Offset(center.dx - radius * 0.22, center.dy - radius * 1.25),
+      Offset(center.dx - radius * 0.28 + math.sin(antennaAngle) * 3,
+          center.dy - radius * 1.45),
+      antennaPaint,
+    );
+
+    // Right antenna
+    canvas.drawLine(
+      Offset(center.dx + radius * 0.22, center.dy - radius * 1.25),
+      Offset(center.dx + radius * 0.28 - math.sin(antennaAngle) * 3,
+          center.dy - radius * 1.45),
+      antennaPaint,
+    );
+
+    // Antenna tips (glowing)
+    final antennaTipPaint = Paint()
+      ..color = const Color(0xFF2196F3)
+      ..style = PaintingStyle.fill
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.28 + math.sin(antennaAngle) * 3,
+          center.dy - radius * 1.45),
+      radius * 0.1,
+      antennaTipPaint,
+    );
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.28 - math.sin(antennaAngle) * 3,
+          center.dy - radius * 1.45),
+      radius * 0.1,
+      antennaTipPaint,
+    );
+
+    // Mouthplate
+    final mouthplatePaint = Paint()
+      ..color = const Color(0xFF616161)
+      ..style = PaintingStyle.fill;
+
+    final mouthplate = Path();
+    mouthplate.moveTo(center.dx + radius * 0.55, center.dy + radius * 0.1);
+    mouthplate.lineTo(center.dx + radius * 0.9, center.dy + radius * 0.25);
+    mouthplate.lineTo(center.dx + radius * 0.8, center.dy + radius * 0.5);
+    mouthplate.lineTo(center.dx + radius * 0.55, center.dy + radius * 0.4);
+    mouthplate.close();
+    canvas.drawPath(mouthplate, mouthplatePaint);
+
+    final mouthOutline = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawPath(mouthplate, mouthOutline);
+
+    // Vent lines on mouthplate
+    final ventPaint = Paint()
+      ..color = const Color(0xFF424242)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    canvas.drawLine(
+      Offset(center.dx + radius * 0.6, center.dy + radius * 0.18),
+      Offset(center.dx + radius * 0.7, center.dy + radius * 0.38),
+      ventPaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx + radius * 0.68, center.dy + radius * 0.2),
+      Offset(center.dx + radius * 0.75, center.dy + radius * 0.42),
+      ventPaint,
+    );
+  }
+
   @override
   bool shouldRepaint(covariant GamePainter oldDelegate) {
     return true; // Always repaint for animation
+  }
+
+  void _drawJM(Canvas canvas, Offset center, double radius) {
+    // Korean K-pop inspired bird with vibrant colors and modern style
+    // Add animation based on bird velocity
+    final velocityFactor = (bird.velocity / 10).clamp(-1.0, 1.0);
+    final hairSway = math.sin(velocityFactor * math.pi) * 8;
+    final wingAngle =
+        math.pi / 4 + math.sin(velocityFactor * math.pi * 2) * 0.3;
+
+    // Body - gradient from hot pink to purple (K-pop vibrant colors)
+    final bodyPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFF1493), // Deep pink
+          const Color(0xFFFF69B4), // Hot pink
+          const Color(0xFF9C27B0), // Purple accent
+        ],
+        stops: const [0.0, 0.6, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawCircle(center, radius, bodyPaint);
+
+    // Stylish K-pop hair - swept side bang with highlights and animation
+    final hairPaint = Paint()
+      ..color = const Color(0xFF6A1B9A) // Deep purple hair
+      ..style = PaintingStyle.fill;
+
+    // Main hair volume with sway
+    final hairPath = Path();
+    hairPath.moveTo(center.dx - radius * 0.8, center.dy - radius * 0.3);
+    hairPath.quadraticBezierTo(
+      center.dx - radius * 0.9 + hairSway,
+      center.dy - radius * 1.0,
+      center.dx - radius * 0.3 + hairSway * 0.5,
+      center.dy - radius * 1.1,
+    );
+    hairPath.quadraticBezierTo(
+      center.dx + radius * 0.2 + hairSway * 0.3,
+      center.dy - radius * 1.2,
+      center.dx + radius * 0.5,
+      center.dy - radius * 0.9,
+    );
+    hairPath.quadraticBezierTo(
+      center.dx + radius * 0.6,
+      center.dy - radius * 0.5,
+      center.dx + radius * 0.4,
+      center.dy - radius * 0.2,
+    );
+    hairPath.close();
+    canvas.drawPath(hairPath, hairPaint);
+
+    // Hair highlights (blonde streaks - common in K-pop) with animation
+    final highlightPaint = Paint()
+      ..color = const Color(0xFFFFD700) // Gold highlights
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+
+    for (int i = 0; i < 5; i++) {
+      final highlightPath = Path();
+      final startX =
+          center.dx - radius * 0.6 + i * radius * 0.25 + hairSway * 0.3;
+      final startY = center.dy - radius * 0.9;
+      highlightPath.moveTo(startX, startY);
+      highlightPath.quadraticBezierTo(
+        startX + radius * 0.1 + hairSway * 0.2,
+        startY + radius * 0.3,
+        startX + radius * 0.05 + hairSway * 0.1,
+        startY + radius * 0.5,
+      );
+      canvas.drawPath(highlightPath, highlightPaint);
+    }
+
+    // Korean headband accessory with pattern
+    final headbandPaint = Paint()
+      ..color = const Color(0xFF00BCD4) // Cyan headband
+      ..style = PaintingStyle.fill;
+
+    final headbandPath = Path();
+    headbandPath.addOval(Rect.fromCenter(
+      center: Offset(center.dx, center.dy - radius * 0.4),
+      width: radius * 1.8,
+      height: radius * 0.35,
+    ));
+    canvas.drawPath(headbandPath, headbandPaint);
+
+    // Headband embroidery pattern with shimmer
+    final patternPaint = Paint()
+      ..color = Colors.white
+          .withOpacity(0.8 + math.sin(velocityFactor * math.pi) * 0.2)
+      ..style = PaintingStyle.fill;
+
+    for (int i = -3; i <= 3; i++) {
+      canvas.drawCircle(
+        Offset(center.dx + i * radius * 0.25, center.dy - radius * 0.4),
+        2.0,
+        patternPaint,
+      );
+    }
+
+    // Modern fashion - collar/jacket detail
+    final collarPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final collarPath = Path();
+    collarPath.moveTo(center.dx - radius * 0.4, center.dy + radius * 0.3);
+    collarPath.lineTo(center.dx - radius * 0.5, center.dy + radius * 0.6);
+    collarPath.lineTo(center.dx - radius * 0.2, center.dy + radius * 0.5);
+    collarPath.close();
+    canvas.drawPath(collarPath, collarPaint);
+
+    collarPath.reset();
+    collarPath.moveTo(center.dx + radius * 0.4, center.dy + radius * 0.3);
+    collarPath.lineTo(center.dx + radius * 0.5, center.dy + radius * 0.6);
+    collarPath.lineTo(center.dx + radius * 0.2, center.dy + radius * 0.5);
+    collarPath.close();
+    canvas.drawPath(collarPath, collarPaint);
+
+    // Stylish wing with gradient and animation
+    canvas.save();
+    canvas.translate(center.dx + radius * 0.3, center.dy);
+    canvas.rotate(wingAngle);
+
+    final wingPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFFF1493),
+          const Color(0xFF00BCD4),
+        ],
+      ).createShader(
+          Rect.fromLTWH(0, -radius * 0.2, radius * 0.8, radius * 0.6));
+
+    final wingPath = Path();
+    wingPath.moveTo(0, 0);
+    wingPath.quadraticBezierTo(
+      radius * 0.4,
+      -radius * 0.3,
+      radius * 0.7,
+      -radius * 0.1,
+    );
+    wingPath.quadraticBezierTo(
+      radius * 0.6,
+      radius * 0.2,
+      radius * 0.1,
+      radius * 0.2,
+    );
+    wingPath.close();
+    canvas.drawPath(wingPath, wingPaint);
+
+    // Wing details - feather lines
+    final featherPaint = Paint()
+      ..color = Colors.white.withOpacity(0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    for (int i = 0; i < 4; i++) {
+      canvas.drawLine(
+        Offset(radius * 0.2, -radius * 0.1 + i * radius * 0.1),
+        Offset(radius * 0.55, -radius * 0.05 + i * radius * 0.08),
+        featherPaint,
+      );
+    }
+
+    canvas.restore();
+
+    // Stylish eyes - K-pop eye makeup look
+    final eyeWhitePaint = Paint()..color = Colors.white;
+
+    // Left eye
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(center.dx - radius * 0.25, center.dy - radius * 0.1),
+        width: radius * 0.4,
+        height: radius * 0.35,
+      ),
+      eyeWhitePaint,
+    );
+
+    // Right eye
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(center.dx + radius * 0.25, center.dy - radius * 0.1),
+        width: radius * 0.4,
+        height: radius * 0.35,
+      ),
+      eyeWhitePaint,
+    );
+
+    // Eye makeup - eyeliner effect with shimmer
+    final eyelinerPaint = Paint()
+      ..color = const Color(0xFF9C27B0) // Purple eyeliner
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    // Left eye liner
+    final leftLiner = Path();
+    leftLiner.moveTo(center.dx - radius * 0.45, center.dy - radius * 0.15);
+    leftLiner.quadraticBezierTo(
+      center.dx - radius * 0.25,
+      center.dy - radius * 0.2,
+      center.dx - radius * 0.05,
+      center.dy - radius * 0.15,
+    );
+    canvas.drawPath(leftLiner, eyelinerPaint);
+
+    // Right eye liner
+    final rightLiner = Path();
+    rightLiner.moveTo(center.dx + radius * 0.05, center.dy - radius * 0.15);
+    rightLiner.quadraticBezierTo(
+      center.dx + radius * 0.25,
+      center.dy - radius * 0.2,
+      center.dx + radius * 0.45,
+      center.dy - radius * 0.15,
+    );
+    canvas.drawPath(rightLiner, eyelinerPaint);
+
+    // Pupils - sparkly effect
+    final pupilPaint = Paint()..color = const Color(0xFF1A237E); // Deep blue
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.25, center.dy - radius * 0.1),
+      radius * 0.12,
+      pupilPaint,
+    );
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.25, center.dy - radius * 0.1),
+      radius * 0.12,
+      pupilPaint,
+    );
+
+    // Eye sparkles with pulse animation
+    final sparkleOpacity = 0.8 + math.sin(velocityFactor * math.pi * 3) * 0.2;
+    final sparklePaint = Paint()
+      ..color = Colors.white.withOpacity(sparkleOpacity);
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.22, center.dy - radius * 0.13),
+      radius * 0.04,
+      sparklePaint,
+    );
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.28, center.dy - radius * 0.13),
+      radius * 0.04,
+      sparklePaint,
+    );
+
+    // Cute smile - K-pop style
+    final smilePaint = Paint()
+      ..color = const Color(0xFFFF1493) // Pink smile
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    final smilePath = Path();
+    smilePath.moveTo(center.dx - radius * 0.2, center.dy + radius * 0.15);
+    smilePath.quadraticBezierTo(
+      center.dx,
+      center.dy + radius * 0.25,
+      center.dx + radius * 0.2,
+      center.dy + radius * 0.15,
+    );
+    canvas.drawPath(smilePath, smilePaint);
+
+    // Beak with gradient - modern style
+    final beakPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFFFC107), // Amber
+          const Color(0xFFFF6F00), // Deep orange
+        ],
+      ).createShader(Rect.fromCenter(
+        center: Offset(center.dx, center.dy + radius * 0.05),
+        width: radius * 0.3,
+        height: radius * 0.25,
+      ));
+
+    final beakPath = Path();
+    beakPath.moveTo(center.dx - radius * 0.08, center.dy + radius * 0.02);
+    beakPath.lineTo(center.dx + radius * 0.08, center.dy + radius * 0.02);
+    beakPath.lineTo(center.dx, center.dy + radius * 0.15);
+    beakPath.close();
+    canvas.drawPath(beakPath, beakPaint);
+
+    // Accessory - small earring/piercing with swing animation
+    final earringSwing = math.sin(velocityFactor * math.pi * 2) * 3;
+    final earringPaint = Paint()..color = const Color(0xFFFFD700); // Gold
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.7, center.dy + earringSwing),
+      radius * 0.08,
+      earringPaint,
+    );
+
+    final earringInner = Paint()..color = const Color(0xFF00BCD4); // Cyan gem
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.7, center.dy + earringSwing),
+      radius * 0.04,
+      earringInner,
+    );
+
+    // Outline
+    final outlinePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawCircle(center, radius, outlinePaint);
   }
 }
