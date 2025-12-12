@@ -102,16 +102,24 @@ class _PhysicsFactsScreenState extends State<PhysicsFactsScreen> {
                                 });
                                 _pageController.jumpToPage(0);
                               },
-                              backgroundColor: Colors.transparent,
+                              backgroundColor: selectedCategory == null
+                                  ? const Color(0xFF3498DB).withOpacity(0.4)
+                                  : const Color(0xFF34495E).withOpacity(0.6),
                               side: BorderSide(
                                 color: selectedCategory == null
-                                    ? const Color(0xFF3498DB)
-                                    : Colors.white30,
-                                width: 2,
+                                    ? const Color.fromARGB(255, 31, 92, 133)
+                                    : const Color(0xFF5DADE2),
+                                width: 2.5,
                               ),
-                              label: const Text(
+                              label: Text(
                                 'All Facts',
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                  color: selectedCategory == null
+                                      ? const Color.fromARGB(255, 68, 77, 83)
+                                      : const Color.fromARGB(255, 94, 107, 116),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ),
@@ -129,18 +137,23 @@ class _PhysicsFactsScreenState extends State<PhysicsFactsScreen> {
                                   });
                                   _pageController.jumpToPage(0);
                                 },
-                                backgroundColor: Colors.transparent,
+                                backgroundColor: isSelected
+                                    ? const Color(0xFF27AE60).withOpacity(0.5)
+                                    : const Color(0xFF34495E).withOpacity(0.6),
                                 side: BorderSide(
                                   color: isSelected
                                       ? const Color(0xFF27AE60)
-                                      : Colors.white30,
-                                  width: 2,
+                                      : const Color(0xFF52BE80),
+                                  width: 2.5,
                                 ),
                                 label: Text(
                                   category.toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? const Color.fromARGB(255, 68, 77, 83)
+                                        : const Color(0xFFAED6F1),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),

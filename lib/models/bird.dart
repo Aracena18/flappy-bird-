@@ -83,7 +83,7 @@ class Bird {
           flapStrength: -6.0,
           size: 44,
           maxVelocity: 8.5,
-          optimalPlanet: 'moon'),
+          optimalPlanet: 'space'),
       10: BirdSpec(
           name: 'JM',
           flapStrength: -17.5,

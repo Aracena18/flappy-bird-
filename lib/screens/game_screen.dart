@@ -672,114 +672,145 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ),
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Animated tap indicator
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.15),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.3), width: 3),
-                        ),
-                        child: const Icon(
-                          Icons.touch_app,
-                          size: 60,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'TAP TO START',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 2,
-                          shadows: [
-                            Shadow(
-                              offset: Offset(2, 2),
-                              blurRadius: 8,
-                              color: Colors.black54,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: widget.mapData.primaryColor.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.5), width: 2),
-                        ),
-                        child: Column(
+                  child: SingleChildScrollView(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final screenWidth = MediaQuery.of(context).size.width;
+                        final isSmallScreen = screenWidth < 380;
+
+                        final iconSize = isSmallScreen ? 48.0 : 60.0;
+                        final titleFontSize = isSmallScreen ? 24.0 : 36.0;
+                        final mapNameFontSize = isSmallScreen ? 18.0 : 22.0;
+                        final mapGravityFontSize = isSmallScreen ? 13.0 : 16.0;
+                        final howToPlayFontSize = isSmallScreen ? 14.0 : 16.0;
+                        final infoFontSize = isSmallScreen ? 11.0 : 13.0;
+                        final spacingSmall = isSmallScreen ? 12.0 : 16.0;
+                        final spacingMedium = isSmallScreen ? 16.0 : 24.0;
+                        final spacingLarge = isSmallScreen ? 20.0 : 32.0;
+                        final containerMargin = isSmallScreen ? 32.0 : 40.0;
+                        final containerPadding = isSmallScreen ? 12.0 : 16.0;
+
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            // Animated tap indicator
+                            Container(
+                              padding: EdgeInsets.all(containerPadding),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.15),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 3,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.touch_app,
+                                size: iconSize,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: spacingMedium),
                             Text(
-                              '${widget.mapData.icon} ${widget.mapData.name}',
-                              style: const TextStyle(
-                                fontSize: 22,
+                              'TAP TO START',
+                              style: TextStyle(
+                                fontSize: titleFontSize,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Gravity: ${widget.mapData.gravity} m/s²',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 40),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(15),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.3)),
-                        ),
-                        child: const Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.info_outline,
-                                    color: Colors.white70, size: 20),
-                                SizedBox(width: 8),
-                                Text(
-                                  'How to Play',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                letterSpacing: 2,
+                                shadows: const [
+                                  Shadow(
+                                    offset: Offset(2, 2),
+                                    blurRadius: 8,
+                                    color: Colors.black54,
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Tap to flap and avoid pipes\nExperience different gravity forces!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.white70,
-                                height: 1.4,
+                            SizedBox(height: spacingSmall),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: spacingSmall,
+                                vertical: containerPadding,
+                              ),
+                              decoration: BoxDecoration(
+                                color: widget.mapData.primaryColor.withOpacity(0.8),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.5),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '${widget.mapData.icon} ${widget.mapData.name}',
+                                    style: TextStyle(
+                                      fontSize: mapNameFontSize,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(height: isSmallScreen ? 2 : 4),
+                                  Text(
+                                    'Gravity: ${widget.mapData.gravity} m/s²',
+                                    style: TextStyle(
+                                      fontSize: mapGravityFontSize,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: spacingLarge),
+                            Container(
+                              margin: EdgeInsets.symmetric(horizontal: containerMargin),
+                              padding: EdgeInsets.all(containerPadding),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.info_outline,
+                                        color: Colors.white70,
+                                        size: isSmallScreen ? 18 : 20,
+                                      ),
+                                      SizedBox(width: spacingSmall),
+                                      Text(
+                                        'How to Play',
+                                        style: TextStyle(
+                                          fontSize: howToPlayFontSize,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: containerPadding),
+                                  Text(
+                                    'Tap to flap and avoid pipes\nExperience different gravity forces!',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: infoFontSize,
+                                      color: Colors.white70,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                    ],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -790,76 +821,133 @@ class _GameScreenState extends State<GameScreen> {
                 color: Colors.black45,
                 child: Center(
                   child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.pause_circle,
-                          size: 64,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Paused',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Display fun fact if available
-                        if (_currentFunFact != null)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: PhysicsFunFactWidget(
-                              fact: _currentFunFact!,
-                              onDismiss: () {
-                                setState(() {
-                                  _currentFunFact =
-                                      PhysicsFactDatabase.getRandomFact();
-                                });
-                              },
-                            ),
-                          ),
-                        const SizedBox(height: 32),
-                        // Resume and Menu buttons
-                        Row(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final screenWidth = MediaQuery.of(context).size.width;
+                        final isSmallScreen = screenWidth < 380;
+
+                        final titleFontSize = isSmallScreen ? 24.0 : 32.0;
+                        final spacingSmall = isSmallScreen ? 12.0 : 16.0;
+                        final spacingLarge = isSmallScreen ? 20.0 : 32.0;
+                        final buttonPadding = isSmallScreen ? 16.0 : 24.0;
+                        final containerMargin = isSmallScreen ? 12.0 : 16.0;
+
+                        return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            ElevatedButton.icon(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.home),
-                              label: const Text('Menu'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black54,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
+                            Icon(
+                              Icons.pause_circle,
+                              size: isSmallScreen ? 48 : 64,
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: spacingSmall),
+                            Text(
+                              'Paused',
+                              style: TextStyle(
+                                fontSize: titleFontSize,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                soundManager.playButton();
-                                _resume();
-                              },
-                              icon: const Icon(Icons.play_arrow),
-                              label: const Text('Resume'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
+                            SizedBox(height: spacingLarge),
+                            // Display fun fact if available
+                            if (_currentFunFact != null)
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: containerMargin),
+                                child: PhysicsFunFactWidget(
+                                  fact: _currentFunFact!,
+                                  onDismiss: () {
+                                    setState(() {
+                                      _currentFunFact =
+                                          PhysicsFactDatabase.getRandomFact();
+                                    });
+                                  },
                                 ),
                               ),
+                            SizedBox(height: spacingLarge),
+                            // Resume and Menu buttons
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: containerMargin),
+                              child: isSmallScreen
+                                  ? Column(
+                                      children: [
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () => Navigator.pop(context),
+                                            icon: const Icon(Icons.home),
+                                            label: const Text('Menu'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.black54,
+                                              foregroundColor: Colors.white,
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: buttonPadding,
+                                                vertical: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: spacingSmall),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              soundManager.playButton();
+                                              _resume();
+                                            },
+                                            icon: const Icon(Icons.play_arrow),
+                                            label: const Text('Resume'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green,
+                                              foregroundColor: Colors.white,
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: buttonPadding,
+                                                vertical: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: () => Navigator.pop(context),
+                                          icon: const Icon(Icons.home),
+                                          label: const Text('Menu'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.black54,
+                                            foregroundColor: Colors.white,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: buttonPadding,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: spacingSmall),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            soundManager.playButton();
+                                            _resume();
+                                          },
+                                          icon: const Icon(Icons.play_arrow),
+                                          label: const Text('Resume'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                            foregroundColor: Colors.white,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: buttonPadding,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -871,169 +959,240 @@ class _GameScreenState extends State<GameScreen> {
                 color: Colors.black.withOpacity(0.75),
                 child: Center(
                   child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Game Over!',
-                          style: TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white12,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            children: [
-                              const Text(
-                                'Final Score',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.white70,
-                                ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final screenWidth = MediaQuery.of(context).size.width;
+                        final isSmallScreen = screenWidth < 380;
+
+                        final containerPadding = isSmallScreen ? 16.0 : 24.0;
+                        final containerMargin = isSmallScreen ? 12.0 : 20.0;
+                        final titleFontSize = isSmallScreen ? 32.0 : 48.0;
+                        final finalScoreLabelFontSize = isSmallScreen ? 16.0 : 20.0;
+                        final scoreFontSize = isSmallScreen ? 48.0 : 64.0;
+                        final mapNameFontSize = isSmallScreen ? 16.0 : 18.0;
+                        final mapGravityFontSize = isSmallScreen ? 12.0 : 14.0;
+                        final achievementTitleFontSize = isSmallScreen ? 16.0 : 18.0;
+                        final achievementItemFontSize = isSmallScreen ? 14.0 : 16.0;
+                        final buttonPadding = isSmallScreen ? 16.0 : 24.0;
+                        final spacingSmall = isSmallScreen ? 16.0 : 24.0;
+                        final spacingMedium = isSmallScreen ? 20.0 : 32.0;
+
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Game Over!',
+                              style: TextStyle(
+                                fontSize: titleFontSize,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '$score',
-                                style: const TextStyle(
-                                  fontSize: 64,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                            ),
+                            SizedBox(height: spacingMedium),
+                            Container(
+                              padding: EdgeInsets.all(containerPadding),
+                              margin: EdgeInsets.symmetric(horizontal: containerMargin),
+                              decoration: BoxDecoration(
+                                color: Colors.white12,
+                                borderRadius: BorderRadius.circular(16),
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                '${widget.mapData.icon} ${widget.mapData.name}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white70,
-                                ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Final Score',
+                                    style: TextStyle(
+                                      fontSize: finalScoreLabelFontSize,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  SizedBox(height: isSmallScreen ? 6 : 8),
+                                  Text(
+                                    '$score',
+                                    style: TextStyle(
+                                      fontSize: scoreFontSize,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(height: isSmallScreen ? 12 : 16),
+                                  Text(
+                                    '${widget.mapData.icon} ${widget.mapData.name}',
+                                    style: TextStyle(
+                                      fontSize: mapNameFontSize,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Gravity: ${widget.mapData.gravity} m/s²',
+                                    style: TextStyle(
+                                      fontSize: mapGravityFontSize,
+                                      color: Colors.white60,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Gravity: ${widget.mapData.gravity} m/s²',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white60,
+                            ),
+                            // Display fun fact
+                            if (_currentFunFact != null) ...[
+                              SizedBox(height: spacingSmall),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: containerMargin),
+                                child: PhysicsFunFactWidget(
+                                  fact: _currentFunFact!,
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                        // Display fun fact
-                        if (_currentFunFact != null) ...[
-                          const SizedBox(height: 24),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: PhysicsFunFactWidget(
-                              fact: _currentFunFact!,
-                            ),
-                          ),
-                        ],
-                        // Achievement Notifications
-                        if (newAchievements.isNotEmpty) ...[
-                          const SizedBox(height: 24),
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFFFD700), // Gold
-                                  Color(0xFFFFB6C1), // Pink
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.yellow.withOpacity(0.5),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                const Text(
-                                  '🎉 NEW ACHIEVEMENTS! 🎉',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                            // Achievement Notifications
+                            if (newAchievements.isNotEmpty) ...[
+                              SizedBox(height: spacingSmall),
+                              Container(
+                                padding: EdgeInsets.all(containerPadding),
+                                margin: EdgeInsets.symmetric(horizontal: containerMargin),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFFFD700), // Gold
+                                      Color(0xFFFFB6C1), // Pink
+                                    ],
                                   ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.yellow.withOpacity(0.5),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 12),
-                                ...newAchievements.map((achievement) => Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 4),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(achievement.icon,
-                                              style: const TextStyle(
-                                                  fontSize: 24)),
-                                          const SizedBox(width: 10),
-                                          Text(
-                                            achievement.title,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      '🎉 NEW ACHIEVEMENTS! 🎉',
+                                      style: TextStyle(
+                                        fontSize: achievementTitleFontSize,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: isSmallScreen ? 8 : 12),
+                                    ...newAchievements.map((achievement) => Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: isSmallScreen ? 2 : 4),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(achievement.icon,
+                                                  style: TextStyle(
+                                                    fontSize: isSmallScreen ? 20 : 24,
+                                                  )),
+                                              SizedBox(width: isSmallScreen ? 8 : 10),
+                                              Flexible(
+                                                child: Text(
+                                                  achievement.title,
+                                                  style: TextStyle(
+                                                    fontSize: achievementItemFontSize,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            SizedBox(height: spacingMedium),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: containerMargin),
+                              child: isSmallScreen
+                                  ? Column(
+                                      children: [
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              soundManager.playButton();
+                                              _restart();
+                                            },
+                                            icon: const Icon(Icons.refresh),
+                                            label: const Text('Play Again'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: widget.mapData.primaryColor,
+                                              foregroundColor: Colors.white,
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: buttonPadding,
+                                                vertical: 12,
+                                              ),
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    )),
-                              ],
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 32),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                soundManager.playButton();
-                                _restart();
-                              },
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Play Again'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: widget.mapData.primaryColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                soundManager.playButton();
-                                Navigator.pop(context);
-                              },
-                              icon: const Icon(Icons.map),
-                              label: const Text('Main menu'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white24,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                              ),
+                                        ),
+                                        SizedBox(height: isSmallScreen ? 12 : 16),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              soundManager.playButton();
+                                              Navigator.pop(context);
+                                            },
+                                            icon: const Icon(Icons.map),
+                                            label: const Text('Main menu'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white24,
+                                              foregroundColor: Colors.white,
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: buttonPadding,
+                                                vertical: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            soundManager.playButton();
+                                            _restart();
+                                          },
+                                          icon: const Icon(Icons.refresh),
+                                          label: const Text('Play Again'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: widget.mapData.primaryColor,
+                                            foregroundColor: Colors.white,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: buttonPadding,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: isSmallScreen ? 12 : 16),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            soundManager.playButton();
+                                            Navigator.pop(context);
+                                          },
+                                          icon: const Icon(Icons.map),
+                                          label: const Text('Main menu'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.white24,
+                                            foregroundColor: Colors.white,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: buttonPadding,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 ),

@@ -36,7 +36,7 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
       icon: '🤖',
       description: 'Half Robot, Half Langgam',
       isUnlocked: true,
-      strength: 'moon',
+      strength: 'space & moon',
       weakness: 'jupiter',
     ),
     BirdCharacter(
@@ -93,14 +93,14 @@ class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
       description: 'John Benedict Bongcac',
       isUnlocked: true,
       strength: 'mars',
-      weakness: 'space, moon',
+      weakness: 'space & moon',
     ),
     BirdCharacter(
       name: 'Bumblebai',
       icon: '🚗',
       description: 'Autobai Bisaya',
       isUnlocked: true,
-      strength: 'moon',
+      strength: 'space & moon',
       weakness: 'jupiter',
     ),
     BirdCharacter(
