@@ -219,7 +219,7 @@ This project is created for educational purposes as part of a physics class assi
 
 For questions about this project, please contact:
 - Email: r.aracena.545985@umindanao.edu.ph
-- Repository: [[Your GitHub Repository]](https://github.com/Aracena18/flappy-bird-)
+- Repository: [GitHub Repository](https://github.com/Aracena18/flappy-bird-)
 
 ---
 
