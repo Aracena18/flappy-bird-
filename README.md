@@ -199,7 +199,11 @@ This project can be used to teach:
 
 ## 👥 Team Members
 
-- [Your Names Here]
+- Robert Jhon D. Aracena
+- John Benedict J. Bongcac
+- Aaron Jalapon
+- Kj M. Lupogan
+- Daniel A. Mercado
 
 ## 📄 License
 
