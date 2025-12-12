@@ -211,15 +211,15 @@ This project is created for educational purposes as part of a physics class assi
 
 ## 🙏 Acknowledgments
 
-- Physics Professor: [Professor's Name]
+- Physics Professor: Marife Lloren Macanlay
 - Inspired by the classic Flappy Bird game
 - Flutter team for the amazing framework
 
 ## 📞 Contact
 
 For questions about this project, please contact:
-- Email: [your-email@example.com]
-- Repository: [Your GitHub Repository]
+- Email: r.aracena.545985@umindanao.edu.ph
+- Repository: [[Your GitHub Repository]](https://github.com/Aracena18/flappy-bird-)
 
 ---
 
