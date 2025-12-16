@@ -21,7 +21,7 @@ class FlappyBirdPhysicsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Floppy Bert Physics',
+      title: 'Fluppy Bert',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
