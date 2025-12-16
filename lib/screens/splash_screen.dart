@@ -198,7 +198,7 @@ class _SplashScreenState extends State<SplashScreen>
                                         ],
                                       ).createShader(bounds),
                                       child: Text(
-                                        'FLOPPY BERT',
+                                        'FLUPPY BERT',
                                         textAlign: TextAlign.center,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
