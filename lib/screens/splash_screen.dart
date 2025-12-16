@@ -171,7 +171,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   FittedBox(
                                     fit: BoxFit.scaleDown,
                                     child: Text(
-                                      'FLOPPY BERT',
+                                      'FLUPPY BERT',
                                       textAlign: TextAlign.center,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
